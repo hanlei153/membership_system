@@ -52,30 +52,27 @@ class _MemberListPageState extends State<MemberListPage> {
     if (selectedDirectory != null) {
       await exportMembers(selectedDirectory);
       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('导出成功: $selectedDirectory/membersInfo.json')),
-    );
+        SnackBar(content: Text('导出成功: $selectedDirectory/membersInfo.json')),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('请选择目录！')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('请选择目录！')));
     }
-    
-    
   }
 
   void _importMembers() async {
     FilePickerResult? selectedFile = await FilePicker.platform.pickFiles();
     if (selectedFile != null) {
       await importMembers(selectedFile.files.single.path);
-    _loadMembers();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('导入成功: ${selectedFile.files.single.path}')),
-    );
+      _loadMembers();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('导入成功: ${selectedFile.files.single.path}')),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('未选择文件')),
-    );
+        SnackBar(content: Text('未选择文件')),
+      );
     }
-    
   }
 
   @override
@@ -165,142 +162,149 @@ class _MemberListPageState extends State<MemberListPage> {
   void _showAddMemberDialog() {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
-
-    showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      builder: (context) => Container(
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '添加新会员',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: '姓名'),
-              ),
-              TextField(
-                controller: phoneController,
-                decoration: InputDecoration(labelText: '电话'),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 300,
+              width: 500,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      final name = nameController.text;
-                      final phone = phoneController.text;
-                      if (name.isNotEmpty && phone.isNotEmpty) {
-                        _addMember(name, phone); // 调用 _addMember 方法
-                      }
-                      Navigator.of(context).pop(); // 关闭底部弹出框
-                    },
-                    child: Text('添加'),
+                  Text(
+                    '添加新会员',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // 关闭底部弹出框
-                    },
-                    child: Text('取消'),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(labelText: '姓名'),
                   ),
+                  TextField(
+                    controller: phoneController,
+                    decoration: InputDecoration(labelText: '电话'),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // 关闭底部弹出框
+                        },
+                        child: Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          final name = nameController.text;
+                          final phone = phoneController.text;
+                          if (name.isNotEmpty && phone.isNotEmpty) {
+                            _addMember(name, phone); // 调用 _addMember 方法
+                          }
+                          Navigator.of(context).pop(); // 关闭底部弹出框
+                        },
+                        child: Text('添加'),
+                      ),
+                    ],
+                  )
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   // 会员更新和充值消费操作
   void _updateMember(Member member) {
     final amountController = TextEditingController(); // 输入金额的控制器
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '更新会员信息',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 300,
+              width: 500,
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '更新会员信息',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 16),
+
+                  // 显示当前余额和积分
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('当前余额: ${member.balance} 元'),
+                      Text('当前积分: ${member.points} 分'),
+                    ],
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // 输入充值或消费金额
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: '金额'),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // 充值按钮
+                      ElevatedButton(
+                        onPressed: () {
+                          final amount = double.tryParse(amountController.text);
+                          if (amount != null && amount > 0) {
+                            setState(() {
+                              member.balance += amount; // 增加余额
+                            });
+                            dbHelper.updateMemberBalance(member);
+                            _loadMembers();
+                            Navigator.of(context).pop(); // 关闭底部弹出框
+                          }
+                        },
+                        child: Text('充值'),
+                      ),
+
+                      // 消费按钮
+                      ElevatedButton(
+                        onPressed: () async {
+                          final amount = double.tryParse(amountController.text);
+                          if (amount != null &&
+                              amount > 0 &&
+                              member.balance >= amount) {
+                            dbHelper.updateBalanceAndPoints(member, amount);
+                            Navigator.of(context).pop(); // 关闭底部弹出框
+                            await Future.delayed(
+                                const Duration(milliseconds: 500));
+                            _loadMembers();
+                          } else {
+                            // 如果余额不足，可以弹出一个提示
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('余额不足，无法消费！')),
+                            );
+                          }
+                        },
+                        child: Text('消费'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 16),
-
-            // 显示当前余额和积分
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text('当前余额: ${member.balance} 元'),
-                Text('当前积分: ${member.points} 分'),
-              ],
-            ),
-
-            SizedBox(height: 16),
-
-            // 输入充值或消费金额
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: '金额'),
-            ),
-
-            SizedBox(height: 16),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // 充值按钮
-                ElevatedButton(
-                  onPressed: () {
-                    final amount = double.tryParse(amountController.text);
-                    if (amount != null && amount > 0) {
-                      setState(() {
-                        member.balance += amount; // 增加余额
-                      });
-                      dbHelper.updateMemberBalance(member);
-                      _loadMembers();
-                      Navigator.of(context).pop(); // 关闭底部弹出框
-                    }
-                  },
-                  child: Text('充值'),
-                ),
-
-                // 消费按钮
-                ElevatedButton(
-                  onPressed: () async {
-                    final amount = double.tryParse(amountController.text);
-                    if (amount != null &&
-                        amount > 0 &&
-                        member.balance >= amount) {
-                      dbHelper.updateBalanceAndPoints(member, amount);
-                      Navigator.of(context).pop(); // 关闭底部弹出框
-                      await Future.delayed(const Duration(milliseconds: 500));
-                      _loadMembers();
-                    } else {
-                      // 如果余额不足，可以弹出一个提示
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('余额不足，无法消费！')),
-                      );
-                    }
-                  },
-                  child: Text('消费'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 }
