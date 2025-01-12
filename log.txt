@@ -1,0 +1,7 @@
+Error: type 'Null' is not a subtype of type 'int'
+StackTrace: #0      Member.fromMap (package:membership_system/common/model/member.dart:26:14)
+#1      importMembers (package:membership_system/common/fuctions/exportMembers.dart:25:39)
+<asynchronous suspension>
+#2      _MemberListPageState._importMembers (package:membership_system/pages/memberListPage.dart:68:7)
+<asynchronous suspension>
+
