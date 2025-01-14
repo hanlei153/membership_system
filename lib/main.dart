@@ -2,7 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'pages/memberListPage.dart';
+import 'pages/mainframePage.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -18,7 +19,8 @@ void main() {
 
   // 捕获打印信息
   debugPrint = (String? message, {int? wrapWidth}) async {
-    await logFile.writeAsString('$message\n', mode: FileMode.append, flush: true);
+    await logFile.writeAsString('$message\n',
+        mode: FileMode.append, flush: true);
   };
 }
 
@@ -26,9 +28,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '会员充值系统',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MemberListPage(),
+      title: '再少年桌游馆会员系统',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(179, 255, 58, 58),
+          // ···
+          brightness: Brightness.light,
+        ),
+        textTheme: TextTheme(
+      displayLarge: const TextStyle(
+        fontSize: 72,
+        fontWeight: FontWeight.bold,
+      ),
+      // ···
+      titleLarge: GoogleFonts.oswald(
+        fontSize: 30,
+        // fontStyle: FontStyle.italic,
+      ),
+      bodyMedium: GoogleFonts.merriweather(),
+      displaySmall: GoogleFonts.pacifico(),
+    ),
+      ),
+      home: MianFramePage(
+        title: '再少年桌游馆会员系统',
+      ),
     );
   }
 }
