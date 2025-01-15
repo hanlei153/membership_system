@@ -1,10 +1,13 @@
 class CommodityCategorys {
   final int? id;
   final String name;
+  bool isExpanded;
 
   CommodityCategorys(
       {required this.id,
-      required this.name});
+      required this.name,
+      this.isExpanded = false,
+      });
 
   Map<String, dynamic> toMap({bool includeId = true}) {
     final map = {

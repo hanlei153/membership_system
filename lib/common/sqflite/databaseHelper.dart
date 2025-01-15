@@ -177,7 +177,8 @@ class DatabaseHelper {
   Future<void> addCommodityCategorys(
       CommodityCategorys categoryCategory) async {
     final db = await database;
-    await db.insert('CommodityCategorys', categoryCategory.toMap(includeId: false));
+    await db.insert(
+        'CommodityCategorys', categoryCategory.toMap(includeId: false));
   }
 
   Future<void> delCommodityCategorys(
@@ -187,10 +188,15 @@ class DatabaseHelper {
         where: 'id = ?', whereArgs: [categoryCategory.id]);
   }
 
-  Future<List<CommodityCategorys>> getCommodityCategorys() async {
+  Future<List<CommodityCategorys>> getCommodityCategorys(
+      {String name = ''}) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps =
-        await db.query('CommodityCategorys');
+    List<Map<String, dynamic>> maps;
+    if (name.isEmpty) {
+      maps = await db.query('CommodityCategorys');
+    } else {
+      maps = await db.query('CommodityCategorys', where: 'name = ?', whereArgs: [name]);
+    }
     return List.generate(
         maps.length, (i) => CommodityCategorys.fromMap(maps[i]));
   }

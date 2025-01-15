@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/commodity.dart';
 import '../../common/model/commodityCategory.dart';
+import 'ExpansionPanelListCategory.dart';
 
 class CommodityManagePage extends StatefulWidget {
   @override
@@ -11,9 +13,11 @@ class CommodityManagePage extends StatefulWidget {
 
 class _CommodityManagePageState extends State<CommodityManagePage> {
   List<CommodityCategorys> commodityCategorys = [];
+  bool commodityCategory = false;
   List<Commoditys> commoditys = [];
   final dbHelper = DatabaseHelper();
   final TextEditingController searchController = TextEditingController();
+  String? _commodityCategorySelectedValue = 'Option 1';
 
   @override
   void initState() {
@@ -38,23 +42,14 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
     });
   }
 
-  List<Map<String, dynamic>> categories = [
-    {
-      'title': 'Category 1',
-      'items': ['Item 1.1', 'Item 1.2', 'Item 1.3'],
-      'isExpanded': false,
-    },
-    {
-      'title': 'Category 2',
-      'items': ['Item 2.1', 'Item 2.2'],
-      'isExpanded': false,
-    },
-    {
-      'title': 'Category 3',
-      'items': ['Item 3.1', 'Item 3.2', 'Item 3.3', 'Item 3.4'],
-      'isExpanded': false,
-    },
-  ];
+  void _searchCommodityCategorys(String name) async {
+    final result = await dbHelper.getCommodityCategorys(name: name);
+    setState(() {
+      if (result.isEmpty) {
+        commodityCategory = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +75,7 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
                     ? ElevatedButton(
                         child: const Text('新增商品'),
                         onPressed: () {
-                          // _exportMembers();
+                          _showAddCommodity();
                         },
                       )
                     : const SizedBox.shrink()
@@ -118,40 +113,132 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
         ),
       ),
       Expanded(
-        child: SingleChildScrollView(
-          child: ExpansionPanelList(
-            elevation: 1,
-            expandedHeaderPadding: EdgeInsets.zero,
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                categories[index]['isExpanded'] = !isExpanded;
-              });
-            },
-            children: categories.map<ExpansionPanel>((category) {
-              return ExpansionPanel(
-                headerBuilder: (context, isExpanded) {
-                  return ListTile(
-                    title: Text(category['title']),
-                  );
-                },
-                body: Column(
-                  children:
-                      (category['items'] as List<String>).map<Widget>((item) {
-                    return ListTile(
-                      title: Text(item),
-                      onTap: () {
-                        print('Clicked: $item');
-                      },
-                    );
-                  }).toList(),
-                ),
-                isExpanded: category['isExpanded'],
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+          child: commodityCategorys.isEmpty
+              ? CircularProgressIndicator()
+              : ExpansionPanelListCategory(
+                  commodityCategorys: commodityCategorys))
     ]));
+  }
+
+  // 新增商品弹窗
+  void _showAddCommodity() {
+    final nameController = TextEditingController();
+    final priceController = TextEditingController();
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 450,
+              width: 300,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Text(
+                  '新增商品',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: '商品名称'),
+                ),
+                TextField(
+                  controller: priceController,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d*$')), // 只允许输入数字
+                  ],
+                  decoration: const InputDecoration(labelText: '商品价格'),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '商品类目：',
+                      style: TextStyle(
+                        fontSize: 16.0, // 设置字体大小
+                      ),
+                    ),
+                    DropdownMenu<String>(
+                      menuHeight: 200,
+                      leadingIcon: Icon(null),
+                      trailingIcon: Icon(null),
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: false,
+                        iconColor: Colors.transparent,
+                      ),
+                      onSelected: (String? newValue) {
+                        setState(() {
+                          _commodityCategorySelectedValue = newValue!;
+                        });
+                      },
+                      dropdownMenuEntries: commodityCategorys.map(
+                        (item) {
+                          return DropdownMenuEntry(
+                              value: item.name, label: item.name);
+                        },
+                      ).toList(),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      '选择图片：',
+                      style: TextStyle(
+                        fontSize: 16.0, // 设置字体大小
+                      ),
+                    ),
+
+                  ],
+                ),
+                const SizedBox(
+                  height: 120,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // 关闭底部弹出框
+                      },
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // final name = nameController.text;
+                        // if (name.isNotEmpty) {
+                        //   _searchCommodityCategorys(name);
+                        //   if (commodityCategory) {
+                        //     _addCommodityCategorys(name);
+                        //   } else {
+                        //     ScaffoldMessenger.of(context).showSnackBar(
+                        //       const SnackBar(
+                        //         content: Text('类目已存在'),
+                        //         duration: Duration(seconds: 2),
+                        //       ),
+                        //     );
+                        //   }
+                        // }
+                        // Navigator.of(context).pop(); // 关闭底部弹出框
+                      },
+                      child: const Text('添加'),
+                    ),
+                  ],
+                )
+              ]),
+            ),
+          );
+        });
   }
 
   // 新增类目弹窗
@@ -196,7 +283,17 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
                         onPressed: () {
                           final name = nameController.text;
                           if (name.isNotEmpty) {
-                            _addCommodityCategorys(name);
+                            _searchCommodityCategorys(name);
+                            if (commodityCategory) {
+                              _addCommodityCategorys(name);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('类目已存在'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
                           }
                           Navigator.of(context).pop(); // 关闭底部弹出框
                         },
