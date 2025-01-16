@@ -162,7 +162,7 @@ class _MemberListPageState extends State<MemberListPage> {
               itemBuilder: (context, index) {
                 final member = members[index];
                 return ContextMenuArea(
-                  width: 200,
+                  width: 100,
                   builder: (context) {
                     return [
                       ListTile(
@@ -345,7 +345,7 @@ class _MemberListPageState extends State<MemberListPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
-                    '销卡',
+                    '修改信息',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -374,7 +374,7 @@ class _MemberListPageState extends State<MemberListPage> {
                           Navigator.of(context).pop();
                           _modifyMember(member, modifyNameContrller.text, modifyPhoneContrller.text);
                         },
-                        child: const Text('销卡'),
+                        child: const Text('确定'),
                       ),
                     ],
                   ),

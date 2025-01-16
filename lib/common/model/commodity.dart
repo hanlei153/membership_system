@@ -1,11 +1,13 @@
 class Commoditys {
   final int? id;
+  final int? commodityCategoryId;
   final String name;
   final String picUrl;
   double price;
 
   Commoditys(
       {required this.id,
+      required this.commodityCategoryId,
       required this.name,
       required this.picUrl,
       required this.price});
@@ -13,6 +15,7 @@ class Commoditys {
   Map<String, dynamic> toMap({bool includeId = true}) {
     final map = {
       'id': id,
+      "commodityCategoryId": commodityCategoryId,
       'name': name,
       'picUrl': picUrl,
       'price': price
@@ -27,6 +30,7 @@ class Commoditys {
   static Commoditys fromMap(Map<String, dynamic> map) {
     return Commoditys(
       id: map['id'],
+      commodityCategoryId: map['commodityCategoryId'],
       name: map['name'],
       picUrl: map['picUrl'],
       price: map['price']

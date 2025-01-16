@@ -181,11 +181,17 @@ class DatabaseHelper {
         'CommodityCategorys', categoryCategory.toMap(includeId: false));
   }
 
-  Future<void> delCommodityCategorys(
-      CommodityCategorys categoryCategory) async {
+  Future<void> delCommodityCategorys(int categoryCategoryId) async {
     final db = await database;
     await db.delete('CommodityCategorys',
-        where: 'id = ?', whereArgs: [categoryCategory.id]);
+        where: 'id = ?', whereArgs: [categoryCategoryId]);
+  }
+
+  Future<void> modityCommodityCategorys(
+      int categoryCategoryId, String name) async {
+    final db = await database;
+    await db.update('CommodityCategorys', {"name": name},
+        where: 'id = ?', whereArgs: [categoryCategoryId]);
   }
 
   Future<List<CommodityCategorys>> getCommodityCategorys(
@@ -195,7 +201,8 @@ class DatabaseHelper {
     if (name.isEmpty) {
       maps = await db.query('CommodityCategorys');
     } else {
-      maps = await db.query('CommodityCategorys', where: 'name = ?', whereArgs: [name]);
+      maps = await db
+          .query('CommodityCategorys', where: 'name = ?', whereArgs: [name]);
     }
     return List.generate(
         maps.length, (i) => CommodityCategorys.fromMap(maps[i]));
@@ -210,5 +217,17 @@ class DatabaseHelper {
   Future<void> delCommodity(Commoditys commodity) async {
     final db = await database;
     await db.insert('Commoditys', commodity.toMap(includeId: false));
+  }
+
+  Future<List<Commoditys>> getCommodity({int commodityCategoryId = 0}) async {
+    final db = await database;
+    List<Map<String, dynamic>> maps;
+    if (commodityCategoryId == 0) {
+      maps = await db.query('Commoditys');
+    } else {
+      maps = await db.query('Commoditys',
+          where: 'CommodityCategoryId = ?', whereArgs: [commodityCategoryId]);
+    }
+    return List.generate(maps.length, (i) => Commoditys.fromMap(maps[i]));
   }
 }
