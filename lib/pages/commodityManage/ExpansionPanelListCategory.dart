@@ -50,7 +50,8 @@ class _ExpansionPanelListCategoryState
   }
 
   Future<bool> _searchCommoditys(int commodityCategoryId) async {
-    final commodites = await dbHelper.getCommodity(commodityCategoryId: commodityCategoryId);
+    final commodites =
+        await dbHelper.getCommodity(commodityCategoryId: commodityCategoryId);
     if (commodites.isEmpty) {
       return true;
     } else {
@@ -66,6 +67,13 @@ class _ExpansionPanelListCategoryState
     await dbHelper.modityCommodityCategorys(commodityCategoryId, name);
   }
 
+  void _modifyCommodity(Commoditys commodity) async {
+    await dbHelper.modityCommoditys(commodity);
+  }
+
+  void _delCommodity(Commoditys commodity) async {
+    await dbHelper.delCommodity(commodity);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,19 +104,19 @@ class _ExpansionPanelListCategoryState
               builder: (context) {
                 return [
                   ListTile(
+                    title: const Text('删除'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _showRemoveCategoryDialog(item);
+                    },
+                  ),
+                  ListTile(
                     title: const Text('编辑'),
                     onTap: () {
                       Navigator.of(context).pop();
                       _showModifyCategoryDialog(item);
                     },
                   ),
-                  ListTile(
-                    title: const Text('删除'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      _showRemoveCategoryDialog(item);
-                    },
-                  )
                 ];
               },
               child: ListTile(
@@ -128,39 +136,53 @@ class _ExpansionPanelListCategoryState
                   itemCount: commodityMap[item.id]?.length ?? 0,
                   itemBuilder: (context, index) {
                     final commodities = commodityMap[item.id];
-                    return Card(
-                      elevation: 5,
-                      margin: const EdgeInsets.all(10),
-                      child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(
-                                    File(commodities![index].picUrl),
-                                  )),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                commodities[index].name,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
+                    return ContextMenuArea(
+                      width: 100,
+                      builder: (context) {
+                        return [
+                          ListTile(
+                            title: const Text('删除'),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              _showRemoveCommodityDialog(commodities[index]);
+                            },
+                          ),
+                          ListTile(
+                            title: const Text('编辑'),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              _showModifyCommodityDialog(commodities[index]);
+                            },
+                          ),
+                        ];
+                      },
+                      child: Card(
+                        elevation: 5,
+                        margin: const EdgeInsets.all(10),
+                        child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      File(commodities![index].picUrl),
+                                      fit: BoxFit.fill,
+                                    )),
+                                const SizedBox(
+                                  height: 8,
                                 ),
-                              ),
-                              const SizedBox(height: 3),
-                              // 商品价格
-                              Text(
-                                "\$${commodities[index].price.toStringAsFixed(2)}",
-                                style: const TextStyle(
-                                  fontSize: 13,
+                                Text(
+                                  "${commodities[index].name}\n${commodities[index].price.toStringAsFixed(2)} 元",
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          )),
+                              ],
+                            )),
+                      ),
                     );
                   },
                 )
@@ -223,7 +245,8 @@ class _ExpansionPanelListCategoryState
           );
         });
   }
-// 删除类目弹窗
+
+  // 删除类目弹窗
   void _showRemoveCategoryDialog(CommodityCategorys commodityCategorys) {
     showDialog(
         context: context,
@@ -258,19 +281,135 @@ class _ExpansionPanelListCategoryState
                       ),
                       ElevatedButton(
                         onPressed: () async {
-                          bool isEmpty = await _searchCommoditys(commodityCategorys.id ?? 0);
+                          bool isEmpty = await _searchCommoditys(
+                              commodityCategorys.id ?? 0);
                           if (isEmpty) {
                             _delCommodityCategorys(commodityCategorys);
                             Navigator.of(context).pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                                 SnackBar(
-                                  content: Text('当前 ${commodityCategorys.name} 类目下还有商品未删除，请先删除商品。'),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
+                              SnackBar(
+                                content: Text(
+                                    '当前 ${commodityCategorys.name} 类目下还有商品未删除，请先删除商品。'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
                           }
-                          
+                        },
+                        child: const Text('确定'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  // 删除商品弹窗
+  void _showRemoveCommodityDialog(Commoditys commodity) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 260,
+              width: 500,
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '删除',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '确定删除商品：${commodity.name} 吗',
+                    // style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 80),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('取消'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          _delCommodity(commodity);
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('确定'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  // 修改商品弹窗
+  void _showModifyCommodityDialog(Commoditys commodity) {
+    final TextEditingController modifyNameContrller =
+        TextEditingController(text: commodity.name);
+    final TextEditingController modifyPriceContrller =
+        TextEditingController(text: commodity.price.toString());
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 300,
+              width: 500,
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '修改商品信息',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: modifyNameContrller,
+                    decoration: const InputDecoration(
+                        labelText: '名称', hintText: '请输入新名称'),
+                  ),
+                  TextField(
+                    controller: modifyPriceContrller,
+                    decoration: const InputDecoration(
+                        labelText: '价格', hintText: '请输入新价格'),
+                  ),
+                  const SizedBox(height: 50),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('取消'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final newInfo = Commoditys(
+                            id: commodity.id,
+                            commodityCategoryId: commodity.commodityCategoryId,
+                            name: modifyNameContrller.text,
+                            price: double.parse(modifyPriceContrller.text),
+                            picUrl: commodity.picUrl,
+                          );
+                          _modifyCommodity(newInfo);
+                          Navigator.of(context).pop();
                         },
                         child: const Text('确定'),
                       ),

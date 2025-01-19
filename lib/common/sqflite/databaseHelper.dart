@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -182,7 +183,6 @@ class DatabaseHelper {
   }
 
   Future<void> delCommodityCategorys(CommodityCategorys commodityCategory) async {
-    print(commodityCategory.name);
     final db = await database;
     await db.delete('CommodityCategorys',
         where: 'id = ?', whereArgs: [commodityCategory.id]);
@@ -217,7 +217,13 @@ class DatabaseHelper {
 
   Future<void> delCommodity(Commoditys commodity) async {
     final db = await database;
-    await db.insert('Commoditys', commodity.toMap(includeId: false));
+    await db.delete('Commoditys', where: "id = ?", whereArgs: [commodity.id]);
+  }
+
+  Future<void> modityCommoditys(Commoditys  commodity) async {
+    final db = await database;
+    await db.update('Commoditys', {"name": commodity.name, "price": commodity.price},
+        where: 'id = ?', whereArgs: [commodity.id]);
   }
 
   Future<List<Commoditys>> getCommodity({int commodityCategoryId = 0}) async {
@@ -231,4 +237,5 @@ class DatabaseHelper {
     }
     return List.generate(maps.length, (i) => Commoditys.fromMap(maps[i]));
   }
+
 }
