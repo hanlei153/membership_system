@@ -404,8 +404,8 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
         final Directory targetDir =
             Directory('${appDocDir.path}/.membership_system/images');
         if (!targetDir.existsSync()) {
-          targetDir.createSync();
-        }
+          targetDir.createSync(recursive: true);
+        } 
 
         // 构建目标文件路径
         final String fileName = result.files.single.name; // 保留原始文件名
@@ -427,7 +427,7 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$e'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 5),
           ),
         );
     }

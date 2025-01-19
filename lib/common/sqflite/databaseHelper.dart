@@ -181,10 +181,11 @@ class DatabaseHelper {
         'CommodityCategorys', categoryCategory.toMap(includeId: false));
   }
 
-  Future<void> delCommodityCategorys(int categoryCategoryId) async {
+  Future<void> delCommodityCategorys(CommodityCategorys commodityCategory) async {
+    print(commodityCategory.name);
     final db = await database;
     await db.delete('CommodityCategorys',
-        where: 'id = ?', whereArgs: [categoryCategoryId]);
+        where: 'id = ?', whereArgs: [commodityCategory.id]);
   }
 
   Future<void> modityCommodityCategorys(

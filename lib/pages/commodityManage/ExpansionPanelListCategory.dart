@@ -49,13 +49,23 @@ class _ExpansionPanelListCategoryState
     });
   }
 
-  void _delCommodityCategorys(int commodityCategoryId) async {
-    await dbHelper.delCommodityCategorys(commodityCategoryId);
+  Future<bool> _searchCommoditys(int commodityCategoryId) async {
+    final commodites = await dbHelper.getCommodity(commodityCategoryId: commodityCategoryId);
+    if (commodites.isEmpty) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void _delCommodityCategorys(CommodityCategorys commodityCategorys) async {
+    await dbHelper.delCommodityCategorys(commodityCategorys);
   }
 
   void _modifyCommodityCategorys(int commodityCategoryId, String name) async {
     await dbHelper.modityCommodityCategorys(commodityCategoryId, name);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +106,7 @@ class _ExpansionPanelListCategoryState
                     title: const Text('删除'),
                     onTap: () {
                       Navigator.of(context).pop();
-                      _showRemoveCategoryDialog(item.id ?? 0, item.name);
-                      // _delCommodityCategorys(item.id ?? 0);
+                      _showRemoveCategoryDialog(item);
                     },
                   )
                 ];
@@ -171,7 +180,7 @@ class _ExpansionPanelListCategoryState
         builder: (BuildContext context) {
           return Dialog(
             child: Container(
-              height: 300,
+              height: 260,
               width: 500,
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -215,24 +224,29 @@ class _ExpansionPanelListCategoryState
         });
   }
 // 删除类目弹窗
-  void _showRemoveCategoryDialog(int commodityCategoryId, String name) {
+  void _showRemoveCategoryDialog(CommodityCategorys commodityCategorys) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return Dialog(
             child: Container(
-              height: 300,
+              height: 260,
               width: 500,
               padding: const EdgeInsets.all(30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '确定删除分类：$name 吗',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  const Text(
+                    '删除',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 16),
+                  Text(
+                    '确定删除分类：${commodityCategorys.name} 吗',
+                    // style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 80),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -243,8 +257,20 @@ class _ExpansionPanelListCategoryState
                         child: const Text('取消'),
                       ),
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
+                        onPressed: () async {
+                          bool isEmpty = await _searchCommoditys(commodityCategorys.id ?? 0);
+                          if (isEmpty) {
+                            _delCommodityCategorys(commodityCategorys);
+                            Navigator.of(context).pop();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                 SnackBar(
+                                  content: Text('当前 ${commodityCategorys.name} 类目下还有商品未删除，请先删除商品。'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                          }
+                          
                         },
                         child: const Text('确定'),
                       ),
