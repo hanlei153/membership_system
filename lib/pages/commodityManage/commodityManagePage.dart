@@ -81,44 +81,20 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
                     : const SizedBox.shrink()
               ],
             ),
-            Row(
+            const Row(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Container(
-                //   width: 300,
-                //   height: 48,
-                //   padding: const EdgeInsets.all(8),
-                //   child: TextField(
-                //     style: const TextStyle(
-                //       fontSize: 13.0, // 设置字体大小
-                //     ),
-                //     controller: searchController,
-                //     decoration: const InputDecoration(
-                //       labelText: '类目或商品名',
-                //       border: OutlineInputBorder(
-                //         borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // ElevatedButton(
-                //   onPressed: () {
-                //     // _searchMembers(searchController.text);
-                //   },
-                //   child: const Text('搜索'),
-                // ),
-              ],
+              children: [],
             ),
           ],
         ),
       ),
       isLoading
-      ? Center(child: CircularProgressIndicator())
-      : Expanded(
-          child: commodityCategorys.isEmpty
-              ? Center(child: Text('暂无类目'))
-              : ExpansionPanelListCategory(
-                  commodityCategorys: commodityCategorys))
+          ? Center(child: CircularProgressIndicator())
+          : Expanded(
+              child: commodityCategorys.isEmpty
+                  ? const Center(child: Text('暂无类目'))
+                  : ExpansionPanelListCategory(
+                      commodityCategorys: commodityCategorys))
     ]));
   }
 
@@ -156,8 +132,7 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
                   ),
                   TextField(
                     controller: nameController,
-                    decoration: const InputDecoration(
-                        labelText: '类目名称'),
+                    decoration: const InputDecoration(labelText: '类目名称'),
                   ),
                   const SizedBox(
                     height: 60,
@@ -405,7 +380,7 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
             Directory('${appDocDir.path}/.membership_system/images');
         if (!targetDir.existsSync()) {
           targetDir.createSync(recursive: true);
-        } 
+        }
 
         // 构建目标文件路径
         final String fileName = result.files.single.name; // 保留原始文件名
@@ -425,11 +400,11 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$e'),
-            duration: Duration(seconds: 5),
-          ),
-        );
+        SnackBar(
+          content: Text('$e'),
+          duration: Duration(seconds: 5),
+        ),
+      );
     }
   }
 }

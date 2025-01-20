@@ -118,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisCount: 3, // 设置每行显示的列数
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 1.4,
+                  childAspectRatio: 1.6,
                 ),
                 itemCount: _data.length,
                 itemBuilder: (context, index) {

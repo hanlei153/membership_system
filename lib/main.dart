@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '再少年桌游馆会员系统',
+      title: '会员系统',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
     ),
       ),
       home: MianFramePage(
-        title: '再少年桌游馆会员系统',
+        title: '会员系统',
       ),
     );
   }
