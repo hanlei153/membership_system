@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -52,7 +53,8 @@ class DatabaseHelper {
             name TEXT,
             phone TEXT,
             balance REAL,
-            points INTEGER
+            points INTEGER,
+            timestamp INTEGER
           )
         ''');
         await db.execute('''
@@ -84,6 +86,20 @@ class DatabaseHelper {
       },
     );
   }
+
+  // 首页数据展示查询
+  Future<int> searchAddMember(int startDate , int endDate ) async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(id) AS total FROM Member WHERE timestamp BETWEEN ? AND ?', [startDate, endDate]);
+    return result[0]['total'] == null ? 0 : result[0]['total'] as int;
+  }
+
+  Future<int> searchEarning(int startDate , int endDate ) async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT SUM(amount) AS total FROM Transactions WHERE timestamp BETWEEN ? AND ? AND type = ?', [startDate, endDate, '消费']);
+    return result[0]['total'] == null ? 0 : result[0]['total'] as int;
+  }
+  
 
   // 会员表
   Future<void> addMember(Member member) async {
@@ -139,6 +155,7 @@ class DatabaseHelper {
       phone: dbMember.phone,
       balance: newBalance,
       points: newPoints,
+      timestamp: dbMember.timestamp
     );
     // 更新数据库中的会员信息
     await dbHelper.updateMemberBalance(updatedMember);

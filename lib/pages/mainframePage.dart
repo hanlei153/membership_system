@@ -16,7 +16,7 @@ class MianFramePage extends StatefulWidget {
 }
 
 class _MianFramePageState extends State<MianFramePage> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 0;
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
@@ -85,14 +85,14 @@ class _MianFramePageState extends State<MianFramePage> {
                 Navigator.of(context).pop();
               },
             ),
-            ListTile(
-              title: const Text('设置'),
-              selected: _selectedIndex == 10,
-              onTap: () {
-                _onItemTapped(10);
-                Navigator.of(context).pop();
-              },
-            ),
+            // ListTile(
+            //   title: const Text('设置'),
+            //   selected: _selectedIndex == 10,
+            //   onTap: () {
+            //     _onItemTapped(10);
+            //     Navigator.of(context).pop();
+            //   },
+            // ),
           ],
         ),
       ),

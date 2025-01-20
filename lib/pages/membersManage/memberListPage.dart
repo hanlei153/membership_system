@@ -53,6 +53,7 @@ class _MemberListPageState extends State<MemberListPage> {
       phone: phone,
       balance: 0.0,
       points: 0,
+      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round()
     );
     await dbHelper.addMember(newMember);
     _loadMembers();
