@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:membership_system/common/model/commodity.dart';
 import 'package:contextmenu/contextmenu.dart';
-import 'package:membership_system/pages/commodityManage/commodityManagePage.dart';
 
 import '../../common/model/commodityCategory.dart';
+import '../../common/model/oncallback.dart';
 import '../../common/sqflite/databaseHelper.dart';
 
 List<CommodityCategorys> generateCategory(
@@ -20,9 +20,11 @@ List<CommodityCategorys> generateCategory(
 }
 
 class ExpansionPanelListCategory extends StatefulWidget {
-  ExpansionPanelListCategory({super.key, required this.commodityCategorys});
+  ExpansionPanelListCategory(
+      {super.key, required this.commodityCategorys, required this.onCallbacks});
 
   List<CommodityCategorys> commodityCategorys;
+  final OnCallBacks onCallbacks;
 
   @override
   State<ExpansionPanelListCategory> createState() =>
@@ -41,30 +43,29 @@ class _ExpansionPanelListCategoryState
     _data = generateCategory(widget.commodityCategorys);
   }
 
-  void _searchCommodity(int commodityCategoryId) async {
-    final commodities =
-        await dbHelper.getCommodity(commodityCategoryId: commodityCategoryId);
-    setState(() {
-      commodityMap[commodityCategoryId] = commodities;
-    });
+  @override
+  void didUpdateWidget(covariant ExpansionPanelListCategory oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 检查 commodityCategorys 是否发生了变化
+    if (widget.commodityCategorys != oldWidget.commodityCategorys) {
+      setState(() {
+        _data = generateCategory(widget.commodityCategorys);
+      });
+    }
   }
 
   Future<bool> _searchCommoditys(int commodityCategoryId) async {
     final commodites =
         await dbHelper.getCommodity(commodityCategoryId: commodityCategoryId);
+    setState(() {
+      commodityMap[commodityCategoryId] = commodites;
+    });
     if (commodites.isEmpty) {
       return true;
     } else {
       return false;
     }
-  }
-
-  void _delCommodityCategorys(CommodityCategorys commodityCategorys) async {
-    await dbHelper.delCommodityCategorys(commodityCategorys);
-  }
-
-  void _modifyCommodityCategorys(int commodityCategoryId, String name) async {
-    await dbHelper.modityCommodityCategorys(commodityCategoryId, name);
   }
 
   void _modifyCommodity(Commoditys commodity) async {
@@ -92,7 +93,7 @@ class _ExpansionPanelListCategoryState
         setState(() {
           _data[index].isExpanded = isExpanded;
           if (isExpanded) {
-            _searchCommodity(_data[index].id ?? 0);
+            _searchCommoditys(_data[index].id ?? 0);
           }
         });
       },
@@ -142,16 +143,23 @@ class _ExpansionPanelListCategoryState
                         return [
                           ListTile(
                             title: const Text('删除'),
-                            onTap: () {
+                            onTap: () async {
                               Navigator.of(context).pop();
-                              _showRemoveCommodityDialog(commodities[index]);
+                              bool isConfirmed = await _showRemoveCommodityDialog(commodities[index]);
+                              if (isConfirmed) {
+                                _searchCommoditys(item.id ?? 0);
+                              }
                             },
                           ),
                           ListTile(
                             title: const Text('编辑'),
-                            onTap: () {
+                            onTap: () async {
                               Navigator.of(context).pop();
-                              _showModifyCommodityDialog(commodities[index]);
+                              bool isConfirmed = await _showModifyCommodityDialog(
+                                      commodities[index]);
+                              if (isConfirmed) {
+                                _searchCommoditys(item.id ?? 0);
+                              }
                             },
                           ),
                         ];
@@ -232,7 +240,8 @@ class _ExpansionPanelListCategoryState
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          _modifyCommodityCategorys(commodityCategorys.id ?? 0,
+                          widget.onCallbacks.onUpdateCategory(
+                              commodityCategorys.id ?? 0,
                               modifyNameContrller.text);
                         },
                         child: const Text('确定'),
@@ -284,7 +293,8 @@ class _ExpansionPanelListCategoryState
                           bool isEmpty = await _searchCommoditys(
                               commodityCategorys.id ?? 0);
                           if (isEmpty) {
-                            _delCommodityCategorys(commodityCategorys);
+                            widget.onCallbacks
+                                .onDeleteCategory(commodityCategorys);
                             Navigator.of(context).pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -308,8 +318,8 @@ class _ExpansionPanelListCategoryState
   }
 
   // 删除商品弹窗
-  void _showRemoveCommodityDialog(Commoditys commodity) {
-    showDialog(
+  Future<bool> _showRemoveCommodityDialog(Commoditys commodity) async {
+    bool? isConfirmed = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return Dialog(
@@ -336,14 +346,14 @@ class _ExpansionPanelListCategoryState
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(false);
                         },
                         child: const Text('取消'),
                       ),
                       ElevatedButton(
-                        onPressed: () async {
+                        onPressed: () {
                           _delCommodity(commodity);
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(true);
                         },
                         child: const Text('确定'),
                       ),
@@ -354,15 +364,20 @@ class _ExpansionPanelListCategoryState
             ),
           );
         });
+    if(isConfirmed == null) {
+      return false;
+    } else {
+      return isConfirmed;
+    }
   }
 
   // 修改商品弹窗
-  void _showModifyCommodityDialog(Commoditys commodity) {
+  Future<bool> _showModifyCommodityDialog(Commoditys commodity) async {
     final TextEditingController modifyNameContrller =
         TextEditingController(text: commodity.name);
     final TextEditingController modifyPriceContrller =
         TextEditingController(text: commodity.price.toString());
-    showDialog(
+    bool? isConfirmed = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return Dialog(
@@ -395,7 +410,7 @@ class _ExpansionPanelListCategoryState
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(false);
                         },
                         child: const Text('取消'),
                       ),
@@ -409,7 +424,7 @@ class _ExpansionPanelListCategoryState
                             picUrl: commodity.picUrl,
                           );
                           _modifyCommodity(newInfo);
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(true);
                         },
                         child: const Text('确定'),
                       ),
@@ -420,5 +435,10 @@ class _ExpansionPanelListCategoryState
             ),
           );
         });
+    if(isConfirmed == null) {
+      return false;
+    } else {
+      return isConfirmed;
+    }
   }
 }

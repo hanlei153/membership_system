@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/commodity.dart';
 import '../../common/model/commodityCategory.dart';
+import '../../common/model/oncallback.dart';
 import 'ExpansionPanelListCategory.dart';
 
 class CommodityManagePage extends StatefulWidget {
@@ -29,26 +30,40 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
 
   void _addCommodityCategorys(String name) async {
     setState(() {
-      isLoading = true; // 开始加载，显示加载状态
+      isLoading = true;
     });
     final newCommodityCategory = CommodityCategorys(id: 0, name: name);
     await dbHelper.addCommodityCategorys(newCommodityCategory);
     await _loadCommodityCategorys();
     setState(() {
-      isLoading = false; // 加载完成，刷新 UI
+      isLoading = false;
     });
   }
 
   Future<void> _loadCommodityCategorys() async {
+    setState(() {
+      isLoading = true;
+    });
     final loadedCommodityCategorys = await dbHelper.getCommodityCategorys();
     setState(() {
       commodityCategorys = loadedCommodityCategorys;
+      isLoading = false;
     });
   }
 
   Future<bool> _searchCommodityCategorys(String name) async {
     final result = await dbHelper.getCommodityCategorys(name: name);
     return result.isEmpty;
+  }
+
+  void _delCommodityCategorys(CommodityCategorys commodityCategorys) async {
+    await dbHelper.delCommodityCategorys(commodityCategorys);
+    await _loadCommodityCategorys();
+  }
+
+  void _modifyCommodityCategorys(int commodityCategoryId, String name) async {
+    await dbHelper.modityCommodityCategorys(commodityCategoryId, name);
+    await _loadCommodityCategorys();
   }
 
   @override
@@ -94,7 +109,9 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
               child: commodityCategorys.isEmpty
                   ? const Center(child: Text('暂无类目'))
                   : ExpansionPanelListCategory(
-                      commodityCategorys: commodityCategorys))
+                      commodityCategorys: commodityCategorys,
+                      onCallbacks: OnCallBacks(onDeleteCategory: _delCommodityCategorys, onUpdateCategory: _modifyCommodityCategorys),
+                    )),
     ]));
   }
 
