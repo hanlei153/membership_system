@@ -1,7 +1,4 @@
 import 'dart:async';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -61,9 +58,11 @@ class DatabaseHelper {
           CREATE TABLE Transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             MemberId INTEGER,
+            memberName TEXT,
             type TEXT,
             amount REAL,
             timestamp INTEGER,
+            note TEXT,
             FOREIGN KEY (memberId) REFERENCES Member (id)
           )
         ''');
@@ -88,18 +87,23 @@ class DatabaseHelper {
   }
 
   // 首页数据展示查询
-  Future<int> searchAddMember(int startDate , int endDate ) async {
+  Future<int> searchAddMember(int startDate, int endDate) async {
     final db = await database;
-    final result = await db.rawQuery('SELECT COUNT(id) AS total FROM Member WHERE timestamp BETWEEN ? AND ?', [startDate, endDate]);
+    final result = await db.rawQuery(
+        'SELECT COUNT(id) AS total FROM Member WHERE timestamp BETWEEN ? AND ?',
+        [startDate, endDate]);
     return result[0]['total'] == null ? 0 : result[0]['total'] as int;
   }
 
-  Future<int> searchEarning(int startDate , int endDate ) async {
+  Future<int> searchEarning(int startDate, int endDate) async {
     final db = await database;
-    final result = await db.rawQuery('SELECT SUM(amount) AS total FROM Transactions WHERE timestamp BETWEEN ? AND ? AND type = ?', [startDate, endDate, '消费']);
-    return result[0]['total'] == null ? 0 : result[0]['total'] as int;
+    final result = await db.rawQuery(
+        'SELECT SUM(amount) AS total FROM Transactions WHERE timestamp BETWEEN ? AND ? AND type = ?',
+        [startDate, endDate, '消费']);
+    return result[0]['total'] == null
+        ? 0
+        : (result[0]['total'] as double).toInt();
   }
-  
 
   // 会员表
   Future<void> addMember(Member member) async {
@@ -139,37 +143,15 @@ class DatabaseHelper {
         where: 'id = ?', whereArgs: [member.id]);
   }
 
-  Future<void> updateBalanceAndPoints(Member member, double amount) async {
-    final dbHelper = DatabaseHelper();
-    // 从数据库中获取所有会员
-    final members = await dbHelper.getMembers();
-    // 找到与传入的会员id匹配的会员
-    final dbMember = members.firstWhere((m) => m.id == member.id);
-    // 更新余额和积分
-    final newBalance = dbMember.balance - amount;
-    final newPoints = dbMember.points + (amount ~/ 10); // 每消费10元积1分
-    // 创建更新后的会员对象
-    final updatedMember = Member(
-      id: dbMember.id, // 使用从数据库获取的会员id
-      name: dbMember.name,
-      phone: dbMember.phone,
-      balance: newBalance,
-      points: newPoints,
-      timestamp: dbMember.timestamp
-    );
-    // 更新数据库中的会员信息
-    await dbHelper.updateMemberBalance(updatedMember);
-  }
-
   // 交易表
   Future<void> addTransactions(Transactions transactions) async {
     final db = await database;
-    await db.insert('Transaction', transactions.toMap(includeId: false));
+    await db.insert('Transactions', transactions.toMap(includeId: false));
   }
 
   Future<List<Transactions>> getTransactions() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('Transactions');
+    final List<Map<String, dynamic>> maps = await db.query('Transactions', orderBy: 'timestamp DESC');
     return List.generate(maps.length, (i) => Transactions.fromMap(maps[i]));
   }
 
@@ -199,7 +181,8 @@ class DatabaseHelper {
         'CommodityCategorys', categoryCategory.toMap(includeId: false));
   }
 
-  Future<void> delCommodityCategorys(CommodityCategorys commodityCategory) async {
+  Future<void> delCommodityCategorys(
+      CommodityCategorys commodityCategory) async {
     final db = await database;
     await db.delete('CommodityCategorys',
         where: 'id = ?', whereArgs: [commodityCategory.id]);
@@ -237,9 +220,10 @@ class DatabaseHelper {
     await db.delete('Commoditys', where: "id = ?", whereArgs: [commodity.id]);
   }
 
-  Future<void> modityCommoditys(Commoditys  commodity) async {
+  Future<void> modityCommoditys(Commoditys commodity) async {
     final db = await database;
-    await db.update('Commoditys', {"name": commodity.name, "price": commodity.price},
+    await db.update(
+        'Commoditys', {"name": commodity.name, "price": commodity.price},
         where: 'id = ?', whereArgs: [commodity.id]);
   }
 
@@ -255,4 +239,37 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => Commoditys.fromMap(maps[i]));
   }
 
+  // 消费
+  Future<dynamic> updateBalanceAndPoints(Member member, double amount, String note) async {
+    final db = await database;
+    final newTransaction = Transactions(
+      id: 0,
+      memberId: member.id!,
+      memberName: member.name,
+      type: '消费',
+      amount: amount,
+      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
+      note: note,
+    );
+    var balance = await db.query(
+      'Member',
+      columns: ['balance'],
+      where: 'id =?',
+      whereArgs: [member.id],
+    );
+    if ((balance[0]['balance'] as double) < amount) {
+      return {"status": "fail", "message": "余额不足"};
+    } else {
+      await db.update(
+          'Member',
+          {
+            'balance': member.balance - amount,
+            'points': member.points + amount,
+          },
+          where: 'id =?',
+          whereArgs: [member.id]);
+      await addTransactions(newTransaction);
+      return {"status": "success", "message": "消费成功"};
+    }
+  }
 }

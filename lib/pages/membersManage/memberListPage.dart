@@ -5,6 +5,7 @@ import 'package:contextmenu/contextmenu.dart';
 import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/member.dart';
 import '../../common/fuctions/exportMembers.dart';
+import '../../common/model/commodity.dart';
 
 class MemberListPage extends StatefulWidget {
   @override
@@ -15,6 +16,8 @@ class _MemberListPageState extends State<MemberListPage> {
   List<Member> members = [];
   final dbHelper = DatabaseHelper();
   final searchController = TextEditingController();
+  String commoditySelectedValue = '';
+  double commoditySelectedValuePrice = 0;
 
   @override
   void initState() {
@@ -48,13 +51,12 @@ class _MemberListPageState extends State<MemberListPage> {
 
   void _addMember(String name, String phone) async {
     final newMember = Member(
-      id: 0,
-      name: name,
-      phone: phone,
-      balance: 0.0,
-      points: 0,
-      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round()
-    );
+        id: 0,
+        name: name,
+        phone: phone,
+        balance: 0.0,
+        points: 0,
+        timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round());
     await dbHelper.addMember(newMember);
     _loadMembers();
   }
@@ -190,11 +192,10 @@ class _MemberListPageState extends State<MemberListPage> {
                     margin: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 15), // 卡片的间距
                     child: ListTile(
-                      contentPadding:
-                          const EdgeInsets.all(10), // 内部的 padding
+                      contentPadding: const EdgeInsets.all(10), // 内部的 padding
                       title: Text('${member.name} (${member.phone})'),
-                      subtitle: Text(
-                          '余额: ${member.balance}, 积分: ${member.points}'),
+                      subtitle:
+                          Text('余额: ${member.balance}, 积分: ${member.points}'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -204,6 +205,16 @@ class _MemberListPageState extends State<MemberListPage> {
                               _memberRecharge(member);
                             },
                             child: const Text('充值'),
+                          ),
+                          const SizedBox(width: 10),
+                          // 消费按钮
+                          ElevatedButton(
+                            onPressed: () async {
+                              final List<Commoditys> commoditys =
+                                  await dbHelper.getCommodity();
+                              _memberConsume(member, commoditys);
+                            },
+                            child: Text('消费'),
                           ),
                           const SizedBox(width: 10),
                         ],
@@ -270,7 +281,6 @@ class _MemberListPageState extends State<MemberListPage> {
                         },
                         child: const Text('添加'),
                       ),
-                      
                     ],
                   )
                 ],
@@ -331,8 +341,10 @@ class _MemberListPageState extends State<MemberListPage> {
 
   // 修改会员弹窗
   void _showModifyMemberDialog(Member member) {
-    final TextEditingController modifyNameContrller = TextEditingController(text: member.name);
-    final TextEditingController modifyPhoneContrller = TextEditingController(text: member.phone);
+    final TextEditingController modifyNameContrller =
+        TextEditingController(text: member.name);
+    final TextEditingController modifyPhoneContrller =
+        TextEditingController(text: member.phone);
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -352,8 +364,8 @@ class _MemberListPageState extends State<MemberListPage> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: modifyNameContrller,
-                    decoration:
-                        const InputDecoration(labelText: '姓名', hintText: '请输入姓名'),
+                    decoration: const InputDecoration(
+                        labelText: '姓名', hintText: '请输入姓名'),
                   ),
                   TextField(
                     controller: modifyPhoneContrller,
@@ -373,7 +385,8 @@ class _MemberListPageState extends State<MemberListPage> {
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          _modifyMember(member, modifyNameContrller.text, modifyPhoneContrller.text);
+                          _modifyMember(member, modifyNameContrller.text,
+                              modifyPhoneContrller.text);
                         },
                         child: const Text('确定'),
                       ),
@@ -414,14 +427,14 @@ class _MemberListPageState extends State<MemberListPage> {
                       Text('当前积分: ${member.points} 分'),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 50),
                   // 输入充值或消费金额
                   TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: '金额'),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 50),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -435,6 +448,9 @@ class _MemberListPageState extends State<MemberListPage> {
                             dbHelper.updateMemberBalance(member);
                             _loadMembers();
                             Navigator.of(context).pop(); // 关闭弹出框
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('充值完成')),
+                              );
                           }
                         },
                         child: const Text('充值'),
@@ -447,27 +463,145 @@ class _MemberListPageState extends State<MemberListPage> {
           );
         });
   }
+
+  // 会员消费弹窗
+  void _memberConsume(Member member, List<Commoditys> commoditys) {
+    final amountController = TextEditingController(); // 输入金额的控制器
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 300,
+              width: 500,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: Text(
+                      '消费',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 显示当前余额和积分
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('当前余额: ${member.balance} 元'),
+                      Text('当前积分: ${member.points} 分'),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  // 输入充值或消费金额
+                  const Text(
+                    '输入金额或选择商品：',
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 200,
+                        child: TextField(
+                          controller: amountController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: '金额'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text('或'),
+                      const SizedBox(width: 10),
+                      DropdownMenu<String>(
+                        menuHeight: 200,
+                        leadingIcon: Icon(null),
+                        trailingIcon: Icon(null),
+                        inputDecorationTheme: const InputDecorationTheme(
+                          filled: false,
+                          iconColor: Colors.transparent,
+                        ),
+                        onSelected: (String? selectedValue) {
+                          setState(() {
+                            if (selectedValue != null) {
+                              // 假设字符串格式为 "id|name"
+                              final parts = selectedValue.split('|');
+                              if (parts.length == 2) {
+                                commoditySelectedValuePrice =
+                                    double.parse(parts[0]);
+                                commoditySelectedValue = parts[1];
+                              }
+                            }
+                          });
+                        },
+                        dropdownMenuEntries: commoditys.map(
+                          (item) {
+                            return DropdownMenuEntry(
+                                value: '${item.price}|${item.name}',
+                                label: item.name);
+                          },
+                        ).toList(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('取消'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (amountController.text.isNotEmpty) {
+                            double amount =
+                                double.tryParse(amountController.text)! +
+                                    commoditySelectedValuePrice;
+                            var result = await dbHelper.updateBalanceAndPoints(
+                                member, amount, commoditySelectedValue);
+                            if (result["status"] == "fail") {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result["message"])),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result["message"])),
+                              );
+                            }
+                          } else {
+                            var result = await dbHelper.updateBalanceAndPoints(
+                                member, commoditySelectedValuePrice, commoditySelectedValue);
+                            
+                            if (result["status"] == "fail") {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result["message"])),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result["message"])),
+                              );
+                            }
+                          }
+                          setState(() {
+                              commoditySelectedValuePrice = 0;
+                              commoditySelectedValue= '';
+                            });
+                          _loadMembers();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('确定'),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+  }
 }
-
-
-// // 消费按钮
-//                       ElevatedButton(
-//                         onPressed: () async {
-//                           final amount = double.tryParse(amountController.text);
-//                           if (amount != null &&
-//                               amount > 0 &&
-//                               member.balance >= amount) {
-//                             dbHelper.updateBalanceAndPoints(member, amount);
-//                             Navigator.of(context).pop(); // 关闭底部弹出框
-//                             await Future.delayed(
-//                                 const Duration(milliseconds: 500));
-//                             _loadMembers();
-//                           } else {
-//                             // 如果余额不足，可以弹出一个提示
-//                             ScaffoldMessenger.of(context).showSnackBar(
-//                               SnackBar(content: Text('余额不足，无法消费！')),
-//                             );
-//                           }
-//                         },
-//                         child: Text('消费'),
-//                       ),

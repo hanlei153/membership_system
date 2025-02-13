@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'membersManage/memberListPage.dart';
-import 'settings/settingPage.dart';
+import 'dataDisplay/dataDisplay.dart';
 import 'home/homePage.dart';
 import 'commodityManage/commodityManagePage.dart';
 
@@ -23,7 +23,7 @@ class _MianFramePageState extends State<MianFramePage> {
     HomePage(),
     MemberListPage(),
     CommodityManagePage(),
-    SettingsPage(),
+    DataDisplayPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -85,14 +85,14 @@ class _MianFramePageState extends State<MianFramePage> {
                 Navigator.of(context).pop();
               },
             ),
-            // ListTile(
-            //   title: const Text('设置'),
-            //   selected: _selectedIndex == 10,
-            //   onTap: () {
-            //     _onItemTapped(10);
-            //     Navigator.of(context).pop();
-            //   },
-            // ),
+            ListTile(
+              title: const Text('数据展示'),
+              selected: _selectedIndex == 3,
+              onTap: () {
+                _onItemTapped(3);
+                Navigator.of(context).pop();
+              },
+            ),
           ],
         ),
       ),
