@@ -236,6 +236,11 @@ class DatabaseHelper {
     await db.delete('Commoditys', where: "id = ?", whereArgs: [commodity.id]);
   }
 
+  Future<void> delCommoditys() async {
+    final db = await database;
+    await db.delete('Commoditys');
+  }
+
   Future<void> modityCommoditys(Commoditys commodity) async {
     final db = await database;
     await db.update(

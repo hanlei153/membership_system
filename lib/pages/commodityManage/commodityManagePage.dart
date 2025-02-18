@@ -61,6 +61,10 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
     await _loadCommodityCategorys();
   }
 
+  void _deleteCommodity() async {
+    await dbHelper.delCommoditys();
+  }
+
   void _modifyCommodityCategorys(int commodityCategoryId, String name) async {
     await dbHelper.modityCommodityCategorys(commodityCategoryId, name);
     await _loadCommodityCategorys();
@@ -96,9 +100,22 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
                     : const SizedBox.shrink()
               ],
             ),
-            const Row(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [],
+              children: [
+                ElevatedButton(
+                  child: const Text('删除全部商品'),
+                  onPressed: () {
+                    _deleteCommodity();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('删除完成'),
+                        duration: Duration(seconds: 5),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -110,7 +127,9 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
                   ? const Center(child: Text('暂无类目'))
                   : ExpansionPanelListCategory(
                       commodityCategorys: commodityCategorys,
-                      onCallbacks: OnCallBacks(onDeleteCategory: _delCommodityCategorys, onUpdateCategory: _modifyCommodityCategorys),
+                      onCallbacks: OnCallBacks(
+                          onDeleteCategory: _delCommodityCategorys,
+                          onUpdateCategory: _modifyCommodityCategorys),
                     )),
     ]));
   }
@@ -390,11 +409,10 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
 
       if (result != null && result.files.single.path != null) {
         // 获取应用的文档目录
-        final Directory appDocDir = await getApplicationDocumentsDirectory();
-
+        final String appDocDir = Platform.resolvedExecutable;
         // 在文档目录中创建一个子目录
-        final Directory targetDir =
-            Directory('${appDocDir.path}/.membership_system/images');
+        final Directory targetDir = Directory(
+            '${appDocDir.replaceAll('membership_system.exe', '')}/.membership_system/images');
         if (!targetDir.existsSync()) {
           targetDir.createSync(recursive: true);
         }
