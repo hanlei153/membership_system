@@ -6,6 +6,7 @@ import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/member.dart';
 import '../../common/fuctions/exportMembers.dart';
 import '../../common/model/commodity.dart';
+import '../../common/model/transaction.dart';
 
 class MemberListPage extends StatefulWidget {
   @override
@@ -439,18 +440,32 @@ class _MemberListPageState extends State<MemberListPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final amount = double.tryParse(amountController.text);
                           if (amount != null && amount > 0) {
                             setState(() {
                               member.balance += amount; // 增加余额
                             });
-                            dbHelper.updateMemberBalance(member, amount);
+                            await dbHelper.updateMemberBalance(member, amount);
+                            final newTransaction = Transactions(
+                              id: 0,
+                              memberId: member.id!,
+                              memberName: member.name,
+                              memberPhone: member.phone,
+                              type: '充值',
+                              amount: amount,
+                              isRefund: 0,
+                              timestamp:
+                                  (DateTime.now().millisecondsSinceEpoch / 1000)
+                                      .round(),
+                              note: '充值',
+                            );
+                            await dbHelper.addTransactions(newTransaction);
                             _loadMembers();
                             Navigator.of(context).pop(); // 关闭弹出框
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('充值完成')),
-                              );
+                              SnackBar(content: Text('充值完成')),
+                            );
                           }
                         },
                         child: const Text('充值'),
@@ -558,39 +573,48 @@ class _MemberListPageState extends State<MemberListPage> {
                       ),
                       ElevatedButton(
                         onPressed: () async {
-                          if (amountController.text.isNotEmpty) {
-                            double amount =
-                                double.tryParse(amountController.text)! +
-                                    commoditySelectedValuePrice;
-                            var result = await dbHelper.updateBalanceAndPoints(
-                                member, amount, commoditySelectedValue);
-                            if (result["status"] == "fail") {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(result["message"])),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(result["message"])),
-                              );
-                            }
+                          // 更新余额操作
+                          var result = await dbHelper.updateBalanceAndPoints(
+                            member,
+                            amountController.text.isNotEmpty
+                                ? commoditySelectedValuePrice + double.tryParse(amountController.text)!
+                                : commoditySelectedValuePrice,
+                            commoditySelectedValue,
+                          );
+
+                          // 添加交易记录操作
+                          final newTransaction = Transactions(
+                            id: 0,
+                            memberId: member.id!,
+                            memberName: member.name,
+                            memberPhone: member.phone,
+                            type: '消费',
+                            amount: amountController.text.isNotEmpty
+                                ? commoditySelectedValuePrice + double.tryParse(amountController.text)!
+                                : commoditySelectedValuePrice,
+                            isRefund: 0,
+                            timestamp:
+                                (DateTime.now().millisecondsSinceEpoch / 1000)
+                                    .round(),
+                            note: commoditySelectedValue.isEmpty
+                                ? '消费'
+                                : commoditySelectedValue,
+                          );
+                          print(newTransaction.amount);
+                          await dbHelper.addTransactions(newTransaction);
+                          if (result["status"] == "fail") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result["message"])),
+                            );
                           } else {
-                            var result = await dbHelper.updateBalanceAndPoints(
-                                member, commoditySelectedValuePrice, commoditySelectedValue);
-                            
-                            if (result["status"] == "fail") {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(result["message"])),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(result["message"])),
-                              );
-                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result["message"])),
+                            );
                           }
                           setState(() {
-                              commoditySelectedValuePrice = 0;
-                              commoditySelectedValue= '';
-                            });
+                            commoditySelectedValuePrice = 0;
+                            commoditySelectedValue = '';
+                          });
                           _loadMembers();
                           Navigator.of(context).pop();
                         },

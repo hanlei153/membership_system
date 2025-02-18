@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Container(
             padding: EdgeInsets.all(16),
-            child: Text(
+            child: const Text(
               '数据展示：',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),

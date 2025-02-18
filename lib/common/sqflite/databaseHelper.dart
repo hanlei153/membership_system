@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -57,10 +58,12 @@ class DatabaseHelper {
         await db.execute('''
           CREATE TABLE Transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            MemberId INTEGER,
+            memberId INTEGER,
             memberName TEXT,
+            memberPhone TEXT,
             type TEXT,
             amount REAL,
+            isRefund INTEGER,
             timestamp INTEGER,
             note TEXT,
             FOREIGN KEY (memberId) REFERENCES Member (id)
@@ -122,6 +125,13 @@ class DatabaseHelper {
         where: 'id = ?', whereArgs: [member.id]);
   }
 
+  Future<Member> getMember(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+        await db.query('Member', where: 'id =?', whereArgs: [id]);
+    return Member.fromMap(maps[0]);
+  }
+
   Future<List<Member>> getMembers() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('Member');
@@ -142,6 +152,17 @@ class DatabaseHelper {
   Future<void> addTransactions(Transactions transactions) async {
     final db = await database;
     await db.insert('Transactions', transactions.toMap(includeId: false));
+  }
+
+  // 退款
+  Future<void> updateTransaction(int transactionId, int isRefund) async {
+    final db = await database;
+    await db.update('Transactions', {"isRefund": isRefund}, where: 'id = ?', whereArgs: [transactionId]);
+  }
+  Future<void> refundBalancePoints(int memberId, double amount) async {
+    final db = await database;
+    Member member = await getMember(memberId);
+    await db.update('Member', {'balance': member.balance + amount, 'points': member.points - amount}, where: 'id =?', whereArgs: [memberId]);
   }
 
   Future<List<Transactions>> getTransactions() async {
@@ -239,30 +260,11 @@ class DatabaseHelper {
     final db = await database;
     await db.update('Member', member.toMap(),
         where: 'id = ?', whereArgs: [member.id]);
-    final newTransaction = Transactions(
-      id: 0,
-      memberId: member.id!,
-      memberName: member.name,
-      type: '充值',
-      amount: amount,
-      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
-      note: '充值',
-    );
-    await addTransactions(newTransaction);
   }
 
   // 消费
   Future<dynamic> updateBalanceAndPoints(Member member, double amount, String note) async {
     final db = await database;
-    final newTransaction = Transactions(
-      id: 0,
-      memberId: member.id!,
-      memberName: member.name,
-      type: '消费',
-      amount: amount,
-      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
-      note: note.isEmpty ? '消费' : note,
-    );
     var balance = await db.query(
       'Member',
       columns: ['balance'],
@@ -280,7 +282,6 @@ class DatabaseHelper {
           },
           where: 'id =?',
           whereArgs: [member.id]);
-      await addTransactions(newTransaction);
       return {"status": "success", "message": "消费成功"};
     }
   }
