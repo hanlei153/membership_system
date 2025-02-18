@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'pages/mainframePage.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -36,21 +35,14 @@ class MyApp extends StatelessWidget {
           // ···
           brightness: Brightness.light,
         ),
-        textTheme: TextTheme(
-      displayLarge: const TextStyle(
+        textTheme: const TextTheme(
+      displayLarge: TextStyle(
         fontSize: 72,
         fontWeight: FontWeight.bold,
       ),
-      // ···
-      titleLarge: GoogleFonts.oswald(
-        fontSize: 30,
-        // fontStyle: FontStyle.italic,
-      ),
-      bodyMedium: GoogleFonts.merriweather(),
-      displaySmall: GoogleFonts.pacifico(),
     ),
       ),
-      home: MianFramePage(
+      home: const MianFramePage(
         title: '会员系统',
       ),
     );

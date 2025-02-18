@@ -35,7 +35,6 @@ dependencies:
   file_picker: ^8.1.7
   path_provider: ^2.1.5
   path: ^1.9.0
-  google_fonts: ^6.2.1
   contextmenu: ^3.0.0  # 右键菜单
 
 

@@ -104,7 +104,7 @@ class _CommodityManagePageState extends State<CommodityManagePage> {
         ),
       ),
       isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Expanded(
               child: commodityCategorys.isEmpty
                   ? const Center(child: Text('暂无类目'))
