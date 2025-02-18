@@ -154,6 +154,14 @@ class DatabaseHelper {
     await db.insert('Transactions', transactions.toMap(includeId: false));
   }
 
+    Future<List<Transactions>> searchTranscations(String searchConditions) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('Transactions',
+        where: 'memberName LIKE ? OR memberPhone LIKE ?',
+        whereArgs: ['%$searchConditions%', '%$searchConditions%']);
+    return List.generate(maps.length, (i) => Transactions.fromMap(maps[i]));
+  }
+
   // 退款
   Future<void> updateTransaction(int transactionId, int isRefund) async {
     final db = await database;
