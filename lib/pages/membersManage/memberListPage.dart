@@ -177,7 +177,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         },
                       ),
                       ListTile(
-                        title: const Text('删除'),
+                        title: const Text('销卡'),
                         onTap: () {
                           Navigator.of(context).pop();
                           _showRemoveMemberDialog(member);
