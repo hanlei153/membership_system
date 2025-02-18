@@ -577,31 +577,13 @@ class _MemberListPageState extends State<MemberListPage> {
                           var result = await dbHelper.updateBalanceAndPoints(
                             member,
                             amountController.text.isNotEmpty
-                                ? commoditySelectedValuePrice + double.tryParse(amountController.text)!
+                                ? commoditySelectedValuePrice +
+                                    double.tryParse(amountController.text)!
                                 : commoditySelectedValuePrice,
                             commoditySelectedValue,
                           );
 
-                          // 添加交易记录操作
-                          final newTransaction = Transactions(
-                            id: 0,
-                            memberId: member.id!,
-                            memberName: member.name,
-                            memberPhone: member.phone,
-                            type: '消费',
-                            amount: amountController.text.isNotEmpty
-                                ? commoditySelectedValuePrice + double.tryParse(amountController.text)!
-                                : commoditySelectedValuePrice,
-                            isRefund: 0,
-                            timestamp:
-                                (DateTime.now().millisecondsSinceEpoch / 1000)
-                                    .round(),
-                            note: commoditySelectedValue.isEmpty
-                                ? '消费'
-                                : commoditySelectedValue,
-                          );
-                          print(newTransaction.amount);
-                          await dbHelper.addTransactions(newTransaction);
+                          // 显示结果
                           if (result["status"] == "fail") {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(result["message"])),
@@ -610,6 +592,26 @@ class _MemberListPageState extends State<MemberListPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(result["message"])),
                             );
+                            // 添加交易记录操作
+                            final newTransaction = Transactions(
+                              id: 0,
+                              memberId: member.id!,
+                              memberName: member.name,
+                              memberPhone: member.phone,
+                              type: '消费',
+                              amount: amountController.text.isNotEmpty
+                                  ? commoditySelectedValuePrice +
+                                      double.tryParse(amountController.text)!
+                                  : commoditySelectedValuePrice,
+                              isRefund: 0,
+                              timestamp:
+                                  (DateTime.now().millisecondsSinceEpoch / 1000)
+                                      .round(),
+                              note: commoditySelectedValue.isEmpty
+                                  ? '消费'
+                                  : commoditySelectedValue,
+                            );
+                            await dbHelper.addTransactions(newTransaction);
                           }
                           setState(() {
                             commoditySelectedValuePrice = 0;
