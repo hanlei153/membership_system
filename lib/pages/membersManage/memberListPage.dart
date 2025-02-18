@@ -445,7 +445,7 @@ class _MemberListPageState extends State<MemberListPage> {
                             setState(() {
                               member.balance += amount; // 增加余额
                             });
-                            dbHelper.updateMemberBalance(member);
+                            dbHelper.updateMemberBalance(member, amount);
                             _loadMembers();
                             Navigator.of(context).pop(); // 关闭弹出框
                             ScaffoldMessenger.of(context).showSnackBar(

@@ -136,12 +136,7 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
   }
 
-  // 充值
-  Future<void> updateMemberBalance(Member member) async {
-    final db = await database;
-    await db.update('Member', member.toMap(),
-        where: 'id = ?', whereArgs: [member.id]);
-  }
+
 
   // 交易表
   Future<void> addTransactions(Transactions transactions) async {
@@ -239,6 +234,23 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => Commoditys.fromMap(maps[i]));
   }
 
+    // 充值
+  Future<void> updateMemberBalance(Member member, double amount) async {
+    final db = await database;
+    await db.update('Member', member.toMap(),
+        where: 'id = ?', whereArgs: [member.id]);
+    final newTransaction = Transactions(
+      id: 0,
+      memberId: member.id!,
+      memberName: member.name,
+      type: '充值',
+      amount: amount,
+      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
+      note: '充值',
+    );
+    await addTransactions(newTransaction);
+  }
+
   // 消费
   Future<dynamic> updateBalanceAndPoints(Member member, double amount, String note) async {
     final db = await database;
@@ -249,7 +261,7 @@ class DatabaseHelper {
       type: '消费',
       amount: amount,
       timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
-      note: note,
+      note: note.isEmpty ? '消费' : note,
     );
     var balance = await db.query(
       'Member',
