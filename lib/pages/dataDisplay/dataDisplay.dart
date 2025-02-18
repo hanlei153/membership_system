@@ -68,6 +68,10 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('充值记录无法退款')),
                       );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('该交易已退款')),
+                      );
                     }
                   },
                   child: Text(transaction.isRefund == 0 ? '退款' : '已退款'),

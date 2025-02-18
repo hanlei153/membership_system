@@ -5,7 +5,6 @@ import 'dataDisplay/dataDisplay.dart';
 import 'home/homePage.dart';
 import 'commodityManage/commodityManagePage.dart';
 
-
 class MianFramePage extends StatefulWidget {
   const MianFramePage({super.key, required this.title});
 
@@ -17,8 +16,9 @@ class MianFramePage extends StatefulWidget {
 
 class _MianFramePageState extends State<MianFramePage> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle = TextStyle(fontSize: 14);
+  double? iconSize = 20;
+  double iconPadding = 10;
   static List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     MemberListPage(),
@@ -37,64 +37,44 @@ class _MianFramePageState extends State<MianFramePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
       ),
-      body: Center(
-        child: _widgetOptions[_selectedIndex],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                // color: Colors.blue,
+      body: Row(
+        children: <Widget>[
+          // 左侧导航栏
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            elevation: 5,
+            onDestinationSelected: _onItemTapped,
+            labelType: NavigationRailLabelType.all,
+            destinations: [
+              NavigationRailDestination(
+                padding: EdgeInsets.only(top: iconPadding),
+                icon: Icon(Icons.home, size: iconSize),
+                label: Text('首页', style: optionStyle),
               ),
-              child: Text('导航'),
-            ),
-            ListTile(
-              title: const Text('首页'),
-              selected: _selectedIndex == 0,
-              onTap: () {
-                _onItemTapped(0);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              title: const Text('会员管理'),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                _onItemTapped(1);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              title: const Text('商品管理'),
-              selected: _selectedIndex == 2,
-              onTap: () {
-                _onItemTapped(2);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              title: const Text('消费记录'),
-              selected: _selectedIndex == 3,
-              onTap: () {
-                _onItemTapped(3);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
+              NavigationRailDestination(
+                padding: EdgeInsets.only(top: iconPadding),
+                icon: Icon(Icons.group, size: iconSize),
+                label: Text('会员管理', style: optionStyle),
+              ),
+              NavigationRailDestination(
+                padding: EdgeInsets.only(top: iconPadding),
+                icon: Icon(Icons.shopping_cart, size: iconSize),
+                label: Text('商品管理', style: optionStyle),
+              ),
+              NavigationRailDestination(
+                padding: EdgeInsets.only(top: iconPadding),
+                icon: Icon(Icons.receipt, size: iconSize),
+                label: Text('消费记录', style: optionStyle),
+              ),
+            ],
+          ),
+
+          // 右侧显示的页面
+          Expanded(
+            child: _widgetOptions[_selectedIndex],
+          ),
+        ],
       ),
     );
   }

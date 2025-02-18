@@ -101,8 +101,8 @@ class DatabaseHelper {
   Future<int> searchEarning(int startDate, int endDate) async {
     final db = await database;
     final result = await db.rawQuery(
-        'SELECT SUM(amount) AS total FROM Transactions WHERE timestamp BETWEEN ? AND ? AND type = ?',
-        [startDate, endDate, '消费']);
+        'SELECT SUM(amount) AS total FROM Transactions WHERE timestamp BETWEEN ? AND ? AND type = ? AND isRefund =?',
+        [startDate, endDate, '消费', 0]);
     return result[0]['total'] == null
         ? 0
         : (result[0]['total'] as double).toInt();
