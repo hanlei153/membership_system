@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:contextmenu/contextmenu.dart';
+import 'package:flutter/services.dart';
 
 import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/member.dart';
 import '../../common/fuctions/exportMembers.dart';
+import '../../common/fuctions/InputFormatter.dart';
 import '../../common/model/commodity.dart';
 import '../../common/model/transaction.dart';
 
@@ -256,6 +258,7 @@ class _MemberListPageState extends State<MemberListPage> {
                     decoration: const InputDecoration(labelText: '姓名'),
                   ),
                   TextField(
+                    inputFormatters: [ElevenDigitsInputFormatter()],
                     controller: phoneController,
                     decoration: const InputDecoration(labelText: '电话'),
                   ),
@@ -369,6 +372,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         labelText: '姓名', hintText: '请输入姓名'),
                   ),
                   TextField(
+                    inputFormatters: [ElevenDigitsInputFormatter()],
                     controller: modifyPhoneContrller,
                     decoration: const InputDecoration(
                         labelText: '手机号', hintText: '请输入手机号'),
@@ -431,6 +435,7 @@ class _MemberListPageState extends State<MemberListPage> {
                   const SizedBox(height: 50),
                   // 输入充值或消费金额
                   TextField(
+                    inputFormatters: [SingleDotInputFormatter()],
                     controller: amountController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: '金额'),
@@ -522,6 +527,7 @@ class _MemberListPageState extends State<MemberListPage> {
                       Container(
                         width: 200,
                         child: TextField(
+                          inputFormatters: [SingleDotInputFormatter()],
                           controller: amountController,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(labelText: '金额'),

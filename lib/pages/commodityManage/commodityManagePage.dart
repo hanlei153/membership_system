@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../common/sqflite/databaseHelper.dart';
+import '../../common/fuctions/InputFormatter.dart';
 import '../../common/model/commodity.dart';
 import '../../common/model/commodityCategory.dart';
 import '../../common/model/oncallback.dart';
@@ -265,10 +265,7 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
           ),
           TextField(
             controller: priceController,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d*$')), // 只允许输入数字
-            ],
+            inputFormatters: [SingleDotInputFormatter()],
             decoration: const InputDecoration(labelText: '商品价格'),
           ),
           const SizedBox(

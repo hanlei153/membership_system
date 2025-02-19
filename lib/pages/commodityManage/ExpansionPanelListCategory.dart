@@ -7,6 +7,7 @@ import 'package:contextmenu/contextmenu.dart';
 import '../../common/model/commodityCategory.dart';
 import '../../common/model/oncallback.dart';
 import '../../common/sqflite/databaseHelper.dart';
+import '../../common/fuctions/InputFormatter.dart';
 
 List<CommodityCategorys> generateCategory(
     List<CommodityCategorys> commodityCategorys) {
@@ -170,7 +171,8 @@ class _ExpansionPanelListCategoryState
                         child: Padding(
                             padding: const EdgeInsets.all(10),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              // crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
@@ -179,10 +181,17 @@ class _ExpansionPanelListCategoryState
                                       fit: BoxFit.fill,
                                     )),
                                 const SizedBox(
-                                  height: 8,
+                                  height: 5,
                                 ),
                                 Text(
-                                  "${commodities[index].name}\n${commodities[index].price.toStringAsFixed(2)} 元",
+                                  commodities[index].name,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "${commodities[index].price.toStringAsFixed(2)} 元",
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
@@ -400,6 +409,7 @@ class _ExpansionPanelListCategoryState
                         labelText: '名称', hintText: '请输入新名称'),
                   ),
                   TextField(
+                    inputFormatters: [SingleDotInputFormatter()],
                     controller: modifyPriceContrller,
                     decoration: const InputDecoration(
                         labelText: '价格', hintText: '请输入新价格'),
