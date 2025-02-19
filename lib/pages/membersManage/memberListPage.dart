@@ -494,7 +494,7 @@ class _MemberListPageState extends State<MemberListPage> {
             child: Container(
               height: 300,
               width: 500,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(30),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,16 +516,15 @@ class _MemberListPageState extends State<MemberListPage> {
                       Text('当前积分: ${member.points} 分'),
                     ],
                   ),
-                  const SizedBox(height: 30),
-                  // 输入充值或消费金额
-                  const Text(
-                    '输入金额或选择商品：',
-                    style: TextStyle(fontSize: 15),
-                  ),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
+                      const Text(
+                        '输入金额：',
+                        style: TextStyle(fontSize: 15),
+                      ),
                       Container(
-                        width: 200,
+                        width: 130,
                         child: TextField(
                           inputFormatters: [SingleDotInputFormatter()],
                           controller: amountController,
@@ -533,13 +532,16 @@ class _MemberListPageState extends State<MemberListPage> {
                           decoration: const InputDecoration(labelText: '金额'),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Text('或'),
-                      const SizedBox(width: 10),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Text(
+                        '选择商品：',
+                        style: TextStyle(fontSize: 15),
+                      ),
                       DropdownMenu<String>(
                         menuHeight: 200,
-                        leadingIcon: Icon(null),
-                        trailingIcon: Icon(null),
                         inputDecorationTheme: const InputDecorationTheme(
                           filled: false,
                           iconColor: Colors.transparent,
