@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-import 'membersManage/memberListPage.dart';
-import 'dataDisplay/dataDisplay.dart';
-import 'home/homePage.dart';
-import 'commodityManage/commodityManagePage.dart';
+import 'package:membership_system/pages/commodityManage/commodityManagePage.dart';
+import 'package:membership_system/pages/membersManage/memberListPage.dart';
+import 'package:membership_system/pages/dataDisplay/dataDisplay.dart';
+import 'package:membership_system/pages/home/homePage.dart';
 
-class MianFramePage extends StatefulWidget {
-  const MianFramePage({super.key, required this.title});
+class MainFramePage extends StatefulWidget {
+  const MainFramePage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MianFramePage> createState() => _MianFramePageState();
+  State<MainFramePage> createState() => _MainFramePageState();
 }
 
-class _MianFramePageState extends State<MianFramePage> {
+class _MainFramePageState extends State<MainFramePage> {
   int _selectedIndex = 0;
   static const TextStyle optionStyle = TextStyle(fontSize: 14);
   double? iconSize = 20;

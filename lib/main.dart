@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'pages/mainframePage.dart';
+import 'pages/Login.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -42,9 +42,7 @@ class MyApp extends StatelessWidget {
       ),
     ),
       ),
-      home: const MianFramePage(
-        title: '会员系统',
-      ),
+      home: const LoginPage(),
     );
   }
 }

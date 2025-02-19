@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../model/user.dart';
 import '../model/member.dart';
 import '../model/transaction.dart';
 import '../model/commodity.dart';
@@ -10,6 +11,8 @@ import '../model/commodityCategory.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
+
+  int currentTime =  (DateTime.now().millisecondsSinceEpoch / 1000).round();
 
   factory DatabaseHelper() => _instance;
 
@@ -45,6 +48,18 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE User (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            password TEXT,
+            name TEXT,
+            phone TEXT,
+            email TEXT,
+            timestamp INTEGER
+          )
+        ''');
+        await db.insert('User', {'id': 1, 'username': 'admin', 'password': '123456', 'name':'管理员','phone':'110','email':'110@qq.com','timestamp':currentTime});
         await db.execute('''
           CREATE TABLE Member (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,6 +121,29 @@ class DatabaseHelper {
     return result[0]['total'] == null
         ? 0
         : (result[0]['total'] as double).toInt();
+  }
+
+
+  // 用户表
+  Future<void> addUser(User user) async {
+    final db = await database;
+    await db.insert('User', user.toMap(includeId: false));
+  }
+
+  Future<void> delUser(User user) async {
+    final db = await database;
+    await db.delete('User', where: 'id =?', whereArgs: [user.id]);
+  }
+
+  Future<void> modifyUser(User user, username, password, name, phone, email) async {
+    final db = await database;
+    await db.update('User', {"username": username, "password": password, "name": name, "phone": phone, "email": email}, where: 'id =?', whereArgs: [user.id]);
+  }
+
+  Future<User> searchUser(String username) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('User', where: 'username =?', whereArgs: [username]);
+    return User.fromMap(maps[0]);
   }
 
   // 会员表
