@@ -5,6 +5,7 @@ class User {
   String name;
   String phone;
   String email;
+  String avatarUrl;
   int timestamp;
 
   // 构造函数
@@ -15,6 +16,7 @@ class User {
     required this.name,
     required this.phone,
     required this.email,
+    this.avatarUrl = '',
     required this.timestamp,
   });
 
@@ -26,6 +28,7 @@ class User {
       'name': name,
       'phone': phone,
       'email': email,
+      'avatarUrl': avatarUrl,
       'timestamp': timestamp,
     };
     if (includeId == false) {
@@ -43,6 +46,7 @@ class User {
       name: map['name'] as String,
       phone: map['phone'] as String,
       email: map['email'] as String,
+      avatarUrl: map['avatarUrl'] as String,
       timestamp: map['timestamp'] as int,
     );
   }

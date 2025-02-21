@@ -56,10 +56,11 @@ class DatabaseHelper {
             name TEXT,
             phone TEXT,
             email TEXT,
+            avatarUrl TEXT,
             timestamp INTEGER
           )
         ''');
-        await db.insert('User', {'id': 1, 'username': 'admin', 'password': '123456', 'name':'管理员','phone':'110','email':'110@qq.com','timestamp':currentTime});
+        await db.insert('User', {'id': 1, 'username': 'admin', 'password': '123456', 'name':'管理员','phone':'110','email':'110@qq.com', 'avatarUrl': '','timestamp':currentTime});
         await db.execute('''
           CREATE TABLE Member (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,9 +136,14 @@ class DatabaseHelper {
     await db.delete('User', where: 'id =?', whereArgs: [user.id]);
   }
 
-  Future<void> modifyUser(User user, username, password, name, phone, email) async {
+  Future<void> modifyUserAvatar(User user) async {
     final db = await database;
-    await db.update('User', {"username": username, "password": password, "name": name, "phone": phone, "email": email}, where: 'id =?', whereArgs: [user.id]);
+    await db.update('User', {"avatarUrl": user.avatarUrl}, where: 'id =?', whereArgs: [user.id]);
+  }
+
+  Future<void> modifyUserPassword(User user) async {
+    final db = await database;
+    await db.update('User', {"password": user.password}, where: 'id =?', whereArgs: [user.id]);
   }
 
   Future<User> searchUser(String username) async {

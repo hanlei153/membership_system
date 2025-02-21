@@ -409,14 +409,14 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
         final String appDocDir = Platform.resolvedExecutable;
         // 在文档目录中创建一个子目录
         final Directory targetDir = Directory(
-            '${appDocDir.replaceAll('membership_system.exe', '')}/.membership_system/images');
+            '${appDocDir.replaceAll('membership_system.exe', '')}.membership_system\\images');
         if (!targetDir.existsSync()) {
           targetDir.createSync(recursive: true);
         }
 
         // 构建目标文件路径
         final String fileName = result.files.single.name; // 保留原始文件名
-        final String targetFilePath = '${targetDir.path}/$fileName';
+        final String targetFilePath = '${targetDir.path}\\$fileName';
 
         setState(() {
           selectedImageFile = result.files.single.path;

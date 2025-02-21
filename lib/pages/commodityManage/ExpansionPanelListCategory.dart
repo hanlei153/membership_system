@@ -171,8 +171,6 @@ class _ExpansionPanelListCategoryState
                         child: Padding(
                             padding: const EdgeInsets.all(10),
                             child: Column(
-                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              // crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
