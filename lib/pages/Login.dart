@@ -22,25 +22,20 @@ class _LoginPageState extends State<LoginPage> {
 
     User user = await dbHelper.searchUser(username);
 
-    // // 这里可以添加实际的登录逻辑，例如验证用户名和密码
-    // if (username == user.username && password == user.password) {
-    //   // 登录成功，导航到主页面
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => const MainFramePage(title: '会员系统')),
-    //   );
-    // } else {
-    //   // 登录失败，显示错误提示
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('用户名或密码错误')),
-    //   );
-    // }
-    Navigator.pushReplacement(
+    // 这里可以添加实际的登录逻辑，例如验证用户名和密码
+    if (username == user.username && password == user.password) {
+      // 登录成功，导航到主页面
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
             builder: (context) => MainFramePage(title: '会员系统', userInfo: user,)),
       );
+    } else {
+      // 登录失败，显示错误提示
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('用户名或密码错误')),
+      );
+    }
   }
 
   @override
