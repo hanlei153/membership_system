@@ -12,6 +12,7 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
   final dbHelper = DatabaseHelper();
   List<Transactions> transactions = [];
   TextEditingController searchController = TextEditingController();
+  bool _isButtonEnabled = true;
 
   void _initTransactions() async {
     // 从数据库中获取所有交易记录
@@ -96,26 +97,9 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
                         ],
                       ),
                       trailing: ElevatedButton(
-                        onPressed: () async {
-                          // 检查交易是否已退款
-                          if (transaction.isRefund == 0 &&
-                              transaction.type == '消费') {
-                            // 执行退款操作
-                            await dbHelper.refundBalancePoints(
-                                transaction.memberId, transaction.amount);
-                            await dbHelper.updateTransaction(
-                                transaction.id!, 1);
-                            _initTransactions();
-                          } else if (transaction.type == '充值') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('充值记录无法退款')),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('该交易已退款')),
-                            );
-                          }
-                        },
+                        onPressed: _isButtonEnabled
+                            ? () async {await _refundButton(transaction);}
+                            : null,
                         child: Text(transaction.isRefund == 0 ? '退款' : '已退款'),
                       ),
                     ),
@@ -127,5 +111,45 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _refundButton(transaction) async {
+    if (!_isButtonEnabled) return;
+    setState(() {
+      _isButtonEnabled = false; // 点击后禁用
+    });
+    try {
+      // 检查交易是否已退款
+      if (transaction.isRefund == 0 && transaction.type == '消费') {
+        // 执行退款操作
+        await dbHelper.refundBalancePoints(
+            transaction.memberId, transaction.amount);
+        await dbHelper.updateTransaction(transaction.id!, 1);
+        _initTransactions();
+        return;
+      } else if (transaction.type == '充值') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('充值记录无法退款')),
+        );
+        return;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('该交易已退款')),
+        );
+        return;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('退款失败')),
+      );
+    } finally {
+      await Future.delayed(Duration(milliseconds: 500));
+      if (mounted) {
+        // 检查组件是否仍在树中
+        setState(() {
+          _isButtonEnabled = true;
+        });
+      }
+    }
   }
 }

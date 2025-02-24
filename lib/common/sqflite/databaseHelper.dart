@@ -335,7 +335,7 @@ class DatabaseHelper {
           'Member',
           {
             'balance': member.balance - amount,
-            'points': member.points + amount,
+            'points': (member.points + amount).round(),
           },
           where: 'id =?',
           whereArgs: [member.id]);

@@ -486,7 +486,75 @@ class _MemberListPageState extends State<MemberListPage> {
 
   // 会员消费弹窗
   void _memberConsume(Member member, List<Commoditys> commoditys) {
+    bool _isButtonEnabled = true;
     final amountController = TextEditingController(); // 输入金额的控制器
+
+    Future<void> _consumptionButton() async {
+      if (!_isButtonEnabled) return; // 防止重复进入
+      setState(() {
+        _isButtonEnabled = false; // 点击后禁用
+      });
+
+      try {
+        if (amountController.text.isNotEmpty ||
+            commoditySelectedValuePrice != 0) {
+          var amount = amountController.text.isNotEmpty
+              ? commoditySelectedValuePrice +
+                  (double.tryParse(amountController.text) ?? 0)
+              : commoditySelectedValuePrice;
+
+          var result = await dbHelper.updateBalanceAndPoints(
+            member,
+            amount,
+            commoditySelectedValue,
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"])),
+          );
+
+          if (result["status"] != "fail") {
+            final newTransaction = Transactions(
+              id: 0,
+              memberId: member.id!,
+              memberName: member.name,
+              memberPhone: member.phone,
+              type: '消费',
+              amount: amount,
+              isRefund: 0,
+              timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
+              note: commoditySelectedValue.isEmpty
+                  ? '消费'
+                  : commoditySelectedValue,
+            );
+            await dbHelper.addTransactions(newTransaction);
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('请输入金额或选择商品')),
+          );
+        }
+
+        setState(() {
+          commoditySelectedValuePrice = 0;
+          commoditySelectedValue = '';
+        });
+        _loadMembers();
+        Navigator.of(context).pop();
+      } catch (e) {
+        print('错误: $e'); // 捕获异常，避免崩溃
+      } finally {
+        // 延迟0.5秒后恢复按钮
+        await Future.delayed(Duration(milliseconds: 500));
+        if (mounted) {
+          // 检查组件是否仍在树中
+          setState(() {
+            _isButtonEnabled = true;
+          });
+        }
+      }
+    }
+
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -529,7 +597,6 @@ class _MemberListPageState extends State<MemberListPage> {
                           inputFormatters: [SingleDotInputFormatter()],
                           controller: amountController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: '金额'),
                         ),
                       ),
                     ],
@@ -580,54 +647,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         child: const Text('取消'),
                       ),
                       ElevatedButton(
-                        onPressed: () async {
-                          // 更新余额操作
-                          var result = await dbHelper.updateBalanceAndPoints(
-                            member,
-                            amountController.text.isNotEmpty
-                                ? commoditySelectedValuePrice +
-                                    double.tryParse(amountController.text)!
-                                : commoditySelectedValuePrice,
-                            commoditySelectedValue,
-                          );
-
-                          // 显示结果
-                          if (result["status"] == "fail") {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result["message"])),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result["message"])),
-                            );
-                            // 添加交易记录操作
-                            final newTransaction = Transactions(
-                              id: 0,
-                              memberId: member.id!,
-                              memberName: member.name,
-                              memberPhone: member.phone,
-                              type: '消费',
-                              amount: amountController.text.isNotEmpty
-                                  ? commoditySelectedValuePrice +
-                                      double.tryParse(amountController.text)!
-                                  : commoditySelectedValuePrice,
-                              isRefund: 0,
-                              timestamp:
-                                  (DateTime.now().millisecondsSinceEpoch / 1000)
-                                      .round(),
-                              note: commoditySelectedValue.isEmpty
-                                  ? '消费'
-                                  : commoditySelectedValue,
-                            );
-                            await dbHelper.addTransactions(newTransaction);
-                          }
-                          setState(() {
-                            commoditySelectedValuePrice = 0;
-                            commoditySelectedValue = '';
-                          });
-                          _loadMembers();
-                          Navigator.of(context).pop();
-                        },
+                        onPressed: _isButtonEnabled ? _consumptionButton : null,
                         child: const Text('确定'),
                       )
                     ],
