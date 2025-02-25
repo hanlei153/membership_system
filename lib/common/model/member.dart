@@ -3,7 +3,9 @@ class Member {
   final String name;
   final String phone;
   double balance;
+  double giftBalance;
   int points;
+  String password;
   int timestamp;
 
   Member(
@@ -11,7 +13,9 @@ class Member {
       required this.name,
       required this.phone,
       required this.balance,
+      required this.giftBalance,
       required this.points,
+      required this.password,
       required this.timestamp});
 
   Map<String, dynamic> toMap({bool includeId = true}) {
@@ -20,7 +24,9 @@ class Member {
       'name': name,
       'phone': phone,
       'balance': balance,
+      'giftBalance': giftBalance,
       'points': points,
+      'password': password,
       'timestamp': timestamp
     };
     // 如果 includeId 为 false，则删除 id 字段
@@ -36,7 +42,9 @@ class Member {
       name: map['name'],
       phone: map['phone'],
       balance: map['balance'],
+      giftBalance: map['giftBalance'],
       points: map['points'],
+      password: map['password'],
       timestamp: map['timestamp']
     );
   }

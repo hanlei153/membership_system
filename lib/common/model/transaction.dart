@@ -5,6 +5,7 @@ class Transactions {
   final String memberPhone;
   final String type;
   double amount;
+  double giftAmount = 0.0;
   int isRefund;
   int timestamp;
   final String note;
@@ -16,6 +17,7 @@ class Transactions {
       required this.memberPhone,
       required this.type,
       required this.amount,
+      required this.giftAmount,
       required this.isRefund,
       required this.timestamp,
       required this.note});
@@ -28,6 +30,7 @@ class Transactions {
       'memberPhone': memberPhone,
       'type': type,
       'amount': amount,
+      'giftAmount': giftAmount,
       'isRefund': isRefund,
       'timestamp': timestamp,
       'note': note
@@ -47,6 +50,7 @@ class Transactions {
       memberPhone: map['memberPhone']?? '',
       type: map['type'],
       amount: map['amount'],
+      giftAmount: map['giftAmount']?? 0.0,
       isRefund: map['isRefund']?? 0,
       timestamp: map['timestamp'],
       note: map['note'] ?? ''

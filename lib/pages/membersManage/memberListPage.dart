@@ -52,13 +52,15 @@ class _MemberListPageState extends State<MemberListPage> {
     _loadMembers();
   }
 
-  void _addMember(String name, String phone) async {
+  void _addMember(String name, String phone, String password) async {
     final newMember = Member(
         id: 0,
         name: name,
         phone: phone,
         balance: 0.0,
+        giftBalance: 0.0,
         points: 0,
+        password: password,
         timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round());
     await dbHelper.addMember(newMember);
     _loadMembers();
@@ -197,8 +199,8 @@ class _MemberListPageState extends State<MemberListPage> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(10), // 内部的 padding
                       title: Text('${member.name} (${member.phone})'),
-                      subtitle:
-                          Text('余额: ${member.balance}, 积分: ${member.points}'),
+                      subtitle: Text(
+                          '余额: ${member.balance.toStringAsFixed(2)}, 赠送余额：${member.giftBalance.toStringAsFixed(2)}, 积分: ${member.points}'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -237,6 +239,7 @@ class _MemberListPageState extends State<MemberListPage> {
   void _showAddMemberDialog() {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
+    final memberPasswordController = TextEditingController();
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -262,6 +265,11 @@ class _MemberListPageState extends State<MemberListPage> {
                     controller: phoneController,
                     decoration: const InputDecoration(labelText: '电话'),
                   ),
+                  TextField(
+                    inputFormatters: [ElevenDigitsInputFormatter()],
+                    controller: memberPasswordController,
+                    decoration: const InputDecoration(labelText: '密码'),
+                  ),
                   const SizedBox(
                     height: 30,
                   ),
@@ -278,8 +286,12 @@ class _MemberListPageState extends State<MemberListPage> {
                         onPressed: () {
                           final name = nameController.text;
                           final phone = phoneController.text;
-                          if (name.isNotEmpty && phone.isNotEmpty) {
-                            _addMember(name, phone); // 调用 _addMember 方法
+                          final password = memberPasswordController.text;
+                          if (name.isNotEmpty &&
+                              phone.isNotEmpty &&
+                              password.isNotEmpty) {
+                            _addMember(
+                                name, phone, password); // 调用 _addMember 方法
                           }
                           Navigator.of(context).pop(); // 关闭底部弹出框
                         },
@@ -407,6 +419,8 @@ class _MemberListPageState extends State<MemberListPage> {
   // 会员充值弹窗
   void _memberRecharge(Member member) {
     final amountController = TextEditingController(); // 输入金额的控制器
+    final giftAmountController =
+        TextEditingController(text: '0.0'); // 输入赠送金额的控制器
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -429,10 +443,11 @@ class _MemberListPageState extends State<MemberListPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text('当前余额: ${member.balance} 元'),
+                      Text('赠送金额：${member.giftBalance} 元'),
                       Text('当前积分: ${member.points} 分'),
                     ],
                   ),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 30),
                   // 输入充值或消费金额
                   TextField(
                     inputFormatters: [SingleDotInputFormatter()],
@@ -440,16 +455,25 @@ class _MemberListPageState extends State<MemberListPage> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: '金额'),
                   ),
-                  const SizedBox(height: 50),
+                  TextField(
+                    inputFormatters: [SingleDotInputFormatter()],
+                    controller: giftAmountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: '赠送金额'),
+                  ),
+                  const SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
                         onPressed: () async {
                           final amount = double.tryParse(amountController.text);
+                          final giftAmount =
+                              double.tryParse(giftAmountController.text);
                           if (amount != null && amount > 0) {
                             setState(() {
                               member.balance += amount; // 增加余额
+                              member.giftBalance += giftAmount!; // 增加赠送金额
                             });
                             await dbHelper.updateMemberBalance(member, amount);
                             final newTransaction = Transactions(
@@ -459,6 +483,7 @@ class _MemberListPageState extends State<MemberListPage> {
                               memberPhone: member.phone,
                               type: '充值',
                               amount: amount,
+                              giftAmount: giftAmount!,
                               isRefund: 0,
                               timestamp:
                                   (DateTime.now().millisecondsSinceEpoch / 1000)
@@ -488,6 +513,7 @@ class _MemberListPageState extends State<MemberListPage> {
   void _memberConsume(Member member, List<Commoditys> commoditys) {
     bool _isButtonEnabled = true;
     final amountController = TextEditingController(); // 输入金额的控制器
+    final passwordContrller = TextEditingController();
 
     Future<void> _consumptionButton() async {
       if (!_isButtonEnabled) return; // 防止重复进入
@@ -498,36 +524,45 @@ class _MemberListPageState extends State<MemberListPage> {
       try {
         if (amountController.text.isNotEmpty ||
             commoditySelectedValuePrice != 0) {
-          var amount = amountController.text.isNotEmpty
-              ? commoditySelectedValuePrice +
-                  (double.tryParse(amountController.text) ?? 0)
-              : commoditySelectedValuePrice;
+          if (passwordContrller.text == member.password &&
+              passwordContrller.text.isNotEmpty) {
+            var amount = amountController.text.isNotEmpty
+                ? commoditySelectedValuePrice +
+                    (double.tryParse(amountController.text) ?? 0)
+                : commoditySelectedValuePrice;
 
-          var result = await dbHelper.updateBalanceAndPoints(
-            member,
-            amount,
-            commoditySelectedValue,
-          );
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result["message"])),
-          );
-
-          if (result["status"] != "fail") {
-            final newTransaction = Transactions(
-              id: 0,
-              memberId: member.id!,
-              memberName: member.name,
-              memberPhone: member.phone,
-              type: '消费',
-              amount: amount,
-              isRefund: 0,
-              timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).round(),
-              note: commoditySelectedValue.isEmpty
-                  ? '消费'
-                  : commoditySelectedValue,
+            var result = await dbHelper.updateBalanceAndPoints(
+              member,
+              amount,
+              commoditySelectedValue,
             );
-            await dbHelper.addTransactions(newTransaction);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result["message"])),
+            );
+
+            if (result["status"] != "fail") {
+              final newTransaction = Transactions(
+                id: 0,
+                memberId: member.id!,
+                memberName: member.name,
+                memberPhone: member.phone,
+                type: '消费',
+                amount: result['balance'],
+                giftAmount: result['giftBalance'],
+                isRefund: 0,
+                timestamp:
+                    (DateTime.now().millisecondsSinceEpoch / 1000).round(),
+                note: commoditySelectedValue.isEmpty
+                    ? '消费'
+                    : commoditySelectedValue,
+              );
+              await dbHelper.addTransactions(newTransaction);
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('密码错误')),
+            );
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -560,7 +595,7 @@ class _MemberListPageState extends State<MemberListPage> {
         builder: (BuildContext context) {
           return Dialog(
             child: Container(
-              height: 300,
+              height: 350,
               width: 500,
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -581,6 +616,7 @@ class _MemberListPageState extends State<MemberListPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text('当前余额: ${member.balance} 元'),
+                      Text('赠送金额：${member.giftBalance} 元'),
                       Text('当前积分: ${member.points} 分'),
                     ],
                   ),
@@ -633,6 +669,22 @@ class _MemberListPageState extends State<MemberListPage> {
                                 label: item.name);
                           },
                         ).toList(),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Text(
+                        '用户密码：',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      Container(
+                        width: 130,
+                        child: TextField(
+                          inputFormatters: [SingleDotInputFormatter()],
+                          controller: passwordContrller,
+                          keyboardType: TextInputType.number,
+                        ),
                       ),
                     ],
                   ),

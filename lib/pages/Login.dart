@@ -11,8 +11,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _usernameController = TextEditingController(text: 'admin');
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController =
+      TextEditingController(text: 'admin');
+  final TextEditingController _passwordController =
+      TextEditingController(text: '123456');
 
   final dbHelper = DatabaseHelper();
 
@@ -28,7 +30,10 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => MainFramePage(title: '会员系统', userInfo: user,)),
+            builder: (context) => MainFramePage(
+                  title: '会员系统',
+                  userInfo: user,
+                )),
       );
     } else {
       // 登录失败，显示错误提示
@@ -59,7 +64,6 @@ class _LoginPageState extends State<LoginPage> {
                     Expanded(
                       child: TextField(
                         controller: _usernameController,
-                        
                       ),
                     ),
                   ],

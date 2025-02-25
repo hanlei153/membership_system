@@ -88,7 +88,9 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
                           '${transaction.memberName} (${transaction.memberPhone})'),
                       subtitle: Row(
                         children: [
-                          Text('金额：${transaction.amount.toString()}'),
+                          Text('余额消费：${transaction.amount.toStringAsFixed(2)}'),
+                          SizedBox(width: 20),
+                          Text('赠送余额消费：${transaction.giftAmount.toStringAsFixed(2)}'),
                           SizedBox(width: 20),
                           Text(
                               '时间：${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().year}-${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().month.toString().padLeft(2, '0')}-${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().day.toString().padLeft(2, '0')} ${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().hour.toString().padLeft(2, '0')}:${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().minute.toString().padLeft(2, '0')}:${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().second.toString().padLeft(2, '0')}'),
@@ -123,7 +125,7 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
       if (transaction.isRefund == 0 && transaction.type == '消费') {
         // 执行退款操作
         await dbHelper.refundBalancePoints(
-            transaction.memberId, transaction.amount);
+            transaction.memberId, transaction.amount, transaction.giftAmount);
         await dbHelper.updateTransaction(transaction.id!, 1);
         _initTransactions();
         return;

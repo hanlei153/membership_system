@@ -12,7 +12,7 @@ import '../model/commodityCategory.dart';
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
-  int currentTime =  (DateTime.now().millisecondsSinceEpoch / 1000).round();
+  int currentTime = (DateTime.now().millisecondsSinceEpoch / 1000).round();
 
   factory DatabaseHelper() => _instance;
 
@@ -34,14 +34,6 @@ class DatabaseHelper {
     print('Existing tables: $tables');
   }
 
-  // 删除数据库文件
-  Future<void> clearDatabase() async {
-    final databasePath = await getDatabasesPath();
-    final path = join(databasePath, 'membership.db');
-    await deleteDatabase(path);
-    print('Database cleared');
-  }
-
   Future<Database> _initDatabase() async {
     final path = join(await getDatabasesPath(), 'membership.db');
     return await openDatabase(
@@ -60,14 +52,25 @@ class DatabaseHelper {
             timestamp INTEGER
           )
         ''');
-        await db.insert('User', {'id': 1, 'username': 'admin', 'password': '123456', 'name':'管理员','phone':'110','email':'110@qq.com', 'avatarUrl': '','timestamp':currentTime});
+        await db.insert('User', {
+          'id': 1,
+          'username': 'admin',
+          'password': '123456',
+          'name': '管理员',
+          'phone': '110',
+          'email': '110@qq.com',
+          'avatarUrl': '',
+          'timestamp': currentTime
+        });
         await db.execute('''
           CREATE TABLE Member (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             phone TEXT,
             balance REAL,
+            giftBalance REAL,
             points INTEGER,
+            password TEXT,
             timestamp INTEGER
           )
         ''');
@@ -79,6 +82,7 @@ class DatabaseHelper {
             memberPhone TEXT,
             type TEXT,
             amount REAL,
+            giftAmount REAL,
             isRefund INTEGER,
             timestamp INTEGER,
             note TEXT,
@@ -124,7 +128,6 @@ class DatabaseHelper {
         : (result[0]['total'] as double).toInt();
   }
 
-
   // 用户表
   Future<void> addUser(User user) async {
     final db = await database;
@@ -138,17 +141,20 @@ class DatabaseHelper {
 
   Future<void> modifyUserAvatar(User user) async {
     final db = await database;
-    await db.update('User', {"avatarUrl": user.avatarUrl}, where: 'id =?', whereArgs: [user.id]);
+    await db.update('User', {"avatarUrl": user.avatarUrl},
+        where: 'id =?', whereArgs: [user.id]);
   }
 
   Future<void> modifyUserPassword(User user) async {
     final db = await database;
-    await db.update('User', {"password": user.password}, where: 'id =?', whereArgs: [user.id]);
+    await db.update('User', {"password": user.password},
+        where: 'id =?', whereArgs: [user.id]);
   }
 
   Future<User> searchUser(String username) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('User', where: 'username =?', whereArgs: [username]);
+    final List<Map<String, dynamic>> maps =
+        await db.query('User', where: 'username =?', whereArgs: [username]);
     return User.fromMap(maps[0]);
   }
 
@@ -190,15 +196,13 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => Member.fromMap(maps[i]));
   }
 
-
-
   // 交易表
   Future<void> addTransactions(Transactions transactions) async {
     final db = await database;
     await db.insert('Transactions', transactions.toMap(includeId: false));
   }
 
-    Future<List<Transactions>> searchTranscations(String searchConditions) async {
+  Future<List<Transactions>> searchTranscations(String searchConditions) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('Transactions',
         where: 'memberName LIKE ? OR memberPhone LIKE ?',
@@ -209,17 +213,22 @@ class DatabaseHelper {
   // 退款
   Future<void> updateTransaction(int transactionId, int isRefund) async {
     final db = await database;
-    await db.update('Transactions', {"isRefund": isRefund}, where: 'id = ?', whereArgs: [transactionId]);
+    await db.update('Transactions', {"isRefund": isRefund},
+        where: 'id = ?', whereArgs: [transactionId]);
   }
-  Future<void> refundBalancePoints(int memberId, double amount) async {
+
+  Future<void> refundBalancePoints(int memberId, double amount, double giftAmount) async {
     final db = await database;
     Member member = await getMember(memberId);
-    await db.update('Member', {'balance': member.balance + amount, 'points': member.points - amount}, where: 'id =?', whereArgs: [memberId]);
+    await db.update('Member',
+        {'balance': member.balance + amount, 'points': (member.points - amount).round(), 'giftBalance': member.giftBalance + giftAmount},
+        where: 'id =?', whereArgs: [memberId]);
   }
 
   Future<List<Transactions>> getTransactions() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('Transactions', orderBy: 'timestamp DESC');
+    final List<Map<String, dynamic>> maps =
+        await db.query('Transactions', orderBy: 'timestamp DESC');
     return List.generate(maps.length, (i) => Transactions.fromMap(maps[i]));
   }
 
@@ -312,7 +321,7 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => Commoditys.fromMap(maps[i]));
   }
 
-    // 充值
+  // 充值
   Future<void> updateMemberBalance(Member member, double amount) async {
     final db = await database;
     await db.update('Member', member.toMap(),
@@ -320,26 +329,31 @@ class DatabaseHelper {
   }
 
   // 消费
-  Future<dynamic> updateBalanceAndPoints(Member member, double amount, String note) async {
+  Future<dynamic> updateBalanceAndPoints(
+      Member member, double amount, String note) async {
     final db = await database;
-    var balance = await db.query(
-      'Member',
-      columns: ['balance'],
-      where: 'id =?',
-      whereArgs: [member.id],
-    );
-    if ((balance[0]['balance'] as double) < amount) {
-      return {"status": "fail", "message": "余额不足"};
-    } else {
+    var balance = member.balance;
+    var giftBalance = member.giftBalance;
+    var totalAmount = amount;
+    if (giftBalance > amount) {
+      giftBalance -= amount;
       await db.update(
-          'Member',
-          {
-            'balance': member.balance - amount,
-            'points': (member.points + amount).round(),
-          },
-          where: 'id =?',
-          whereArgs: [member.id]);
-      return {"status": "success", "message": "消费成功"};
+          'Member', {'balance': balance, 'giftBalance': giftBalance},
+          where: 'id =?', whereArgs: [member.id]);
+      return {"status": "success", "message": "消费成功", 'balance': 0.0, 'giftBalance': amount};
+    } else {
+
+      amount -= giftBalance;
+      if (balance < amount) {
+        return {"status": "fail", "message": "余额不足"};
+      } else {
+        balance -= amount;
+        giftBalance = 0.0;
+        await db.update(
+            'Member', {'balance': balance, 'giftBalance': giftBalance, 'points': (member.points + (totalAmount - member.giftBalance)).round()},
+            where: 'id =?', whereArgs: [member.id]);
+        return {"status": "success", "message": "消费成功", 'balance': totalAmount - member.giftBalance, 'giftBalance': member.giftBalance};
+      }
     }
   }
 }
