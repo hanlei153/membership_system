@@ -169,10 +169,20 @@ class DatabaseHelper {
     await db.delete('Member', where: 'id = ?', whereArgs: [member.id]);
   }
 
-  Future<void> modifyMember(Member member, name, phone) async {
+  Future<void> modifyMember(Member member, name, phone, password) async {
     final db = await database;
-    await db.update('Member', {"name": name, "phone": phone},
-        where: 'id = ?', whereArgs: [member.id]);
+    Map<String, dynamic> messageMap = {};
+    if (name != '') {
+      messageMap['name'] = name;
+    }
+    if (phone != '') {
+      messageMap['phone'] = phone;
+    }
+    if (password != '') {
+      messageMap['password'] = password;
+    }
+    await db
+        .update('Member', messageMap, where: 'id = ?', whereArgs: [member.id]);
   }
 
   Future<Member> getMember(int id) async {
@@ -217,12 +227,19 @@ class DatabaseHelper {
         where: 'id = ?', whereArgs: [transactionId]);
   }
 
-  Future<void> refundBalancePoints(int memberId, double amount, double giftAmount) async {
+  Future<void> refundBalancePoints(
+      int memberId, double amount, double giftAmount) async {
     final db = await database;
     Member member = await getMember(memberId);
-    await db.update('Member',
-        {'balance': member.balance + amount, 'points': (member.points - amount).round(), 'giftBalance': member.giftBalance + giftAmount},
-        where: 'id =?', whereArgs: [memberId]);
+    await db.update(
+        'Member',
+        {
+          'balance': member.balance + amount,
+          'points': (member.points - amount).round(),
+          'giftBalance': member.giftBalance + giftAmount
+        },
+        where: 'id =?',
+        whereArgs: [memberId]);
   }
 
   Future<List<Transactions>> getTransactions() async {
@@ -340,9 +357,13 @@ class DatabaseHelper {
       await db.update(
           'Member', {'balance': balance, 'giftBalance': giftBalance},
           where: 'id =?', whereArgs: [member.id]);
-      return {"status": "success", "message": "消费成功", 'balance': 0.0, 'giftBalance': amount};
+      return {
+        "status": "success",
+        "message": "消费成功",
+        'balance': 0.0,
+        'giftBalance': amount
+      };
     } else {
-
       amount -= giftBalance;
       if (balance < amount) {
         return {"status": "fail", "message": "余额不足"};
@@ -350,9 +371,21 @@ class DatabaseHelper {
         balance -= amount;
         giftBalance = 0.0;
         await db.update(
-            'Member', {'balance': balance, 'giftBalance': giftBalance, 'points': (member.points + (totalAmount - member.giftBalance)).round()},
-            where: 'id =?', whereArgs: [member.id]);
-        return {"status": "success", "message": "消费成功", 'balance': totalAmount - member.giftBalance, 'giftBalance': member.giftBalance};
+            'Member',
+            {
+              'balance': balance,
+              'giftBalance': giftBalance,
+              'points':
+                  (member.points + (totalAmount - member.giftBalance)).round()
+            },
+            where: 'id =?',
+            whereArgs: [member.id]);
+        return {
+          "status": "success",
+          "message": "消费成功",
+          'balance': totalAmount - member.giftBalance,
+          'giftBalance': member.giftBalance
+        };
       }
     }
   }

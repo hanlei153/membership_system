@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/member.dart';
-import '../../common/fuctions/exportMembers.dart';
+import '../../common/fuctions/importExportMembers.dart';
 import '../../common/fuctions/InputFormatter.dart';
 import '../../common/model/commodity.dart';
 import '../../common/model/transaction.dart';
@@ -47,8 +47,8 @@ class _MemberListPageState extends State<MemberListPage> {
     _loadMembers();
   }
 
-  void _modifyMember(Member member, name, phone) async {
-    await dbHelper.modifyMember(member, name, phone);
+  void _modifyMember(Member member, name, phone, password) async {
+    await dbHelper.modifyMember(member, name, phone, password);
     _loadMembers();
   }
 
@@ -71,7 +71,7 @@ class _MemberListPageState extends State<MemberListPage> {
     if (selectedDirectory != null) {
       await exportMembers(selectedDirectory);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('导出成功: $selectedDirectory/membersInfo.json')),
+        SnackBar(content: Text('导出成功: $selectedDirectory/membersInfo.xlsx')),
       );
     } else {
       ScaffoldMessenger.of(context)
@@ -80,7 +80,7 @@ class _MemberListPageState extends State<MemberListPage> {
   }
 
   void _importMembers() async {
-    FilePickerResult? selectedFile = await FilePicker.platform.pickFiles();
+    FilePickerResult? selectedFile = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['xlsx', 'xls']);
     if (selectedFile != null) {
       await importMembers(selectedFile.files.single.path);
       _loadMembers();
@@ -230,6 +230,13 @@ class _MemberListPageState extends State<MemberListPage> {
               },
             ),
           ),
+          const SizedBox(
+            height: 10,
+          ),
+          Text('总会员数: ${members.length}', style: const TextStyle(fontSize: 12, color: Colors.grey),),
+          const SizedBox(
+            height: 10,
+          )
         ],
       ),
     );
@@ -361,12 +368,14 @@ class _MemberListPageState extends State<MemberListPage> {
         TextEditingController(text: member.name);
     final TextEditingController modifyPhoneContrller =
         TextEditingController(text: member.phone);
+    final TextEditingController modifyPasswordContrller =
+        TextEditingController(text: member.password);
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return Dialog(
             child: Container(
-              height: 300,
+              height: 330,
               width: 500,
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -389,7 +398,13 @@ class _MemberListPageState extends State<MemberListPage> {
                     decoration: const InputDecoration(
                         labelText: '手机号', hintText: '请输入手机号'),
                   ),
-                  const SizedBox(height: 50),
+                  TextField(
+                    inputFormatters: [ElevenDigitsInputFormatter()],
+                    controller: modifyPasswordContrller,
+                    decoration: const InputDecoration(
+                        labelText: '密码', hintText: '请输入密码'),
+                  ),
+                  const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -402,8 +417,11 @@ class _MemberListPageState extends State<MemberListPage> {
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          _modifyMember(member, modifyNameContrller.text,
-                              modifyPhoneContrller.text);
+                          _modifyMember(
+                              member,
+                              modifyNameContrller.text,
+                              modifyPhoneContrller.text,
+                              modifyPasswordContrller.text);
                         },
                         child: const Text('确定'),
                       ),
