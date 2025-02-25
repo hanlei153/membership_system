@@ -80,7 +80,8 @@ class _MemberListPageState extends State<MemberListPage> {
   }
 
   void _importMembers() async {
-    FilePickerResult? selectedFile = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['xlsx', 'xls']);
+    FilePickerResult? selectedFile = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx', 'xls']);
     if (selectedFile != null) {
       await importMembers(selectedFile.files.single.path);
       _loadMembers();
@@ -233,7 +234,10 @@ class _MemberListPageState extends State<MemberListPage> {
           const SizedBox(
             height: 10,
           ),
-          Text('总会员数: ${members.length}', style: const TextStyle(fontSize: 12, color: Colors.grey),),
+          Text(
+            '总会员数: ${members.length}',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
           const SizedBox(
             height: 10,
           )
@@ -320,7 +324,7 @@ class _MemberListPageState extends State<MemberListPage> {
         builder: (BuildContext context) {
           return Dialog(
             child: Container(
-              height: 300,
+              height: 280,
               width: 500,
               padding: const EdgeInsets.all(30),
               child: Column(
@@ -334,9 +338,10 @@ class _MemberListPageState extends State<MemberListPage> {
                   const SizedBox(height: 16),
                   Text('姓名：${member.name}'),
                   Text('余额：${member.balance}'),
+                  Text('赠送余额：${member.giftBalance}'),
                   Text('积分：${member.points}'),
                   Text('手机号：${member.phone}'),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -349,7 +354,14 @@ class _MemberListPageState extends State<MemberListPage> {
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
-                          _delMember(member);
+                          if (member.balance > 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('${member.name} 余额不为0，无法销卡')),
+                            );
+                          } else {
+                            _delMember(member);
+                          }
                         },
                         child: const Text('销卡'),
                       ),

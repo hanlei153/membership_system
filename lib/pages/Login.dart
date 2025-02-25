@@ -14,7 +14,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController =
       TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
-      TextEditingController(text: '123456');
+      TextEditingController(text: '');
 
   final dbHelper = DatabaseHelper();
 
