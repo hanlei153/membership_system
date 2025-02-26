@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
         context,
         MaterialPageRoute(
             builder: (context) => MainFramePage(
-                  title: '会员系统',
+                  title: '鲸储会员系统',
                   userInfo: user,
                 )),
       );

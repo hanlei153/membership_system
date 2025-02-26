@@ -158,6 +158,12 @@ class DatabaseHelper {
     return User.fromMap(maps[0]);
   }
 
+  Future<List<User>> getUsers() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('User');
+    return List.generate(maps.length, (i) => User.fromMap(maps[i]));
+  }
+
   // 会员表
   Future<void> addMember(Member member) async {
     final db = await database;
