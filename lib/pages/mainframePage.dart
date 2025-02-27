@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:file_picker/file_picker.dart';
@@ -11,6 +12,8 @@ import 'package:membership_system/pages/dataDisplay/dataDisplay.dart';
 import 'package:membership_system/pages/home/homePage.dart';
 import 'package:membership_system/common/model/user.dart';
 import 'package:membership_system/common/sqflite/databaseHelper.dart';
+import '../common/fuctions/LogFilePrinter.dart';
+
 
 class MainFramePage extends StatefulWidget {
   const MainFramePage({super.key, required this.title, required this.userInfo});
@@ -24,6 +27,7 @@ class MainFramePage extends StatefulWidget {
 
 class _MainFramePageState extends State<MainFramePage> {
   final dbHelper = DatabaseHelper();
+  var logger = Logger(printer: LogFilePrinter());
   int _selectedIndex = 0;
   static const TextStyle optionStyle = TextStyle(fontSize: 14);
   double? iconSize = 20;
@@ -43,6 +47,7 @@ class _MainFramePageState extends State<MainFramePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      logger.d('导航：${_widgetOptions[_selectedIndex]}页');
     });
   }
 
