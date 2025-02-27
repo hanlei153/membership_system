@@ -7,20 +7,7 @@ import 'pages/Login.dart';
 void main() {
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
-  // 捕获日志并写入文件
-  final logFile = File('log.txt');
-  runZonedGuarded(() async {
-    runApp(MyApp());
-  }, (error, stackTrace) async {
-    final log = 'Error: $error\nStackTrace: $stackTrace\n';
-    await logFile.writeAsString(log, mode: FileMode.append, flush: true);
-  });
-
-  // 捕获打印信息
-  debugPrint = (String? message, {int? wrapWidth}) async {
-    await logFile.writeAsString('$message\n',
-        mode: FileMode.append, flush: true);
-  };
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

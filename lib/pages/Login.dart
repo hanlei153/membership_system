@@ -1,5 +1,8 @@
 import 'mainframePage.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+import '../common/fuctions/LogFilePrinter.dart';
 import '../common/sqflite/databaseHelper.dart';
 import '../common/model/user.dart';
 
@@ -15,31 +18,39 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
       TextEditingController(text: '');
+  var logger = Logger(printer: LogFilePrinter());
 
   final dbHelper = DatabaseHelper();
 
   void _login() async {
-    String username = _usernameController.text;
-    String password = _passwordController.text;
+    logger.d('调用登陆按钮！');
+    try {
+      String username = _usernameController.text;
+      String password = _passwordController.text;
 
-    User user = await dbHelper.searchUser(username);
+      User user = await dbHelper.searchUser(username);
 
-    // 这里可以添加实际的登录逻辑，例如验证用户名和密码
-    if (username == user.username && password == user.password) {
-      // 登录成功，导航到主页面
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MainFramePage(
-                  title: '鲸储会员系统',
-                  userInfo: user,
-                )),
-      );
-    } else {
-      // 登录失败，显示错误提示
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('用户名或密码错误')),
-      );
+      // 这里可以添加实际的登录逻辑，例如验证用户名和密码
+      if (username == user.username && password == user.password) {
+        logger.d('登陆成功！');
+        // 登录成功，导航到主页面
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MainFramePage(
+                    title: '鲸储会员系统',
+                    userInfo: user,
+                  )),
+        );
+      } else {
+        logger.d('用户名或密码错误！');
+        // 登录失败，显示错误提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('用户名或密码错误')),
+        );
+      }
+    } catch (e) {
+      logger.e(e);
     }
   }
 
