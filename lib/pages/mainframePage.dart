@@ -46,7 +46,7 @@ class _MainFramePageState extends State<MainFramePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      logger.d('导航：${_widgetOptions[_selectedIndex]}页');
+      logger.i('导航：${_widgetOptions[_selectedIndex]}页');
     });
   }
 

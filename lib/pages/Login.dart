@@ -18,12 +18,12 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
       TextEditingController(text: '');
-  var logger = Logger(printer: LogFilePrinter());
+  var logger = Logger(printer: LogFilePrinter(),level: Level.verbose,);
 
   final dbHelper = DatabaseHelper();
 
   void _login() async {
-    logger.d('调用登陆按钮！');
+    logger.i('调用登陆按钮！');
     try {
       String username = _usernameController.text;
       String password = _passwordController.text;
@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // 这里可以添加实际的登录逻辑，例如验证用户名和密码
       if (username == user.username && password == user.password) {
-        logger.d('登陆成功！');
+        logger.i('登陆成功！');
         // 登录成功，导航到主页面
         Navigator.pushReplacement(
           context,

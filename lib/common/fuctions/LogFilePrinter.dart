@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -32,15 +33,18 @@ class LogFilePrinter extends LogPrinter {
   }
 
   Future<void> _writeToFile(String logMessage) async {
+  try {
     final logFilePath = await _getLogFilePath();
     final logFile = File(logFilePath);
+    final logDirectory = logFile.parent;
 
-    // If the file doesn't exist, create it
-    if (!await logFile.exists()) {
-      await logFile.create();
+    if (!await logDirectory.exists()) {
+      await logDirectory.create(recursive: true);
     }
 
-    // Append the log message to the file
     await logFile.writeAsString('$logMessage\n', mode: FileMode.append);
+  } catch (e) {
+    debugPrint('Failed to write log: $e'); // 使用debugPrint确保Release模式可见
   }
+}
 }
