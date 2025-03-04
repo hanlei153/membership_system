@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: const Text(
               '数据展示：',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -130,12 +130,12 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(_data[index]["icon"], size: 50),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(_data[index]["title"],
-                              style: TextStyle(fontSize: 28)),
-                          SizedBox(height: 8),
+                              style: const TextStyle(fontSize: 28)),
+                          const SizedBox(height: 8),
                           Text(_data[index]["value"].toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.bold)),
                         ],
                       ),

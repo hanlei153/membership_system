@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../common/model/transaction.dart';
 import '../../common/sqflite/databaseHelper.dart';
-import '../../common/model/member.dart';
 
 class DataDisplayPage extends StatefulWidget {
   @override
@@ -71,7 +70,7 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: ListView.builder(
                 itemCount: transactions.length,
                 itemBuilder: (context, index) {
@@ -89,12 +88,12 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
                       subtitle: Row(
                         children: [
                           Text('余额消费：${transaction.amount.toStringAsFixed(2)}'),
-                          SizedBox(width: 20),
+                          const SizedBox(width: 20),
                           Text('赠送余额消费：${transaction.giftAmount.toStringAsFixed(2)}'),
-                          SizedBox(width: 20),
+                          const SizedBox(width: 20),
                           Text(
                               '时间：${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().year}-${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().month.toString().padLeft(2, '0')}-${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().day.toString().padLeft(2, '0')} ${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().hour.toString().padLeft(2, '0')}:${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().minute.toString().padLeft(2, '0')}:${DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000).toLocal().second.toString().padLeft(2, '0')}'),
-                          SizedBox(width: 20),
+                          const SizedBox(width: 20),
                           Text('备注：${transaction.note}'),
                         ],
                       ),
@@ -131,21 +130,21 @@ class _DataDisplayPageState extends State<DataDisplayPage> {
         return;
       } else if (transaction.type == '充值') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('充值记录无法退款')),
+          const SnackBar(content: Text('充值记录无法退款')),
         );
         return;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('该交易已退款')),
+          const SnackBar(content: Text('该交易已退款')),
         );
         return;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('退款失败')),
+        const SnackBar(content: Text('退款失败')),
       );
     } finally {
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
         // 检查组件是否仍在树中
         setState(() {

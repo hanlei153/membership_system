@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:contextmenu/contextmenu.dart';
-import 'package:flutter/services.dart';
 
 import '../../common/sqflite/databaseHelper.dart';
 import '../../common/model/member.dart';
@@ -9,6 +9,7 @@ import '../../common/fuctions/importExportMembers.dart';
 import '../../common/fuctions/InputFormatter.dart';
 import '../../common/model/commodity.dart';
 import '../../common/model/transaction.dart';
+import '../../common/fuctions/LogFilePrinter.dart';
 
 class MemberListPage extends StatefulWidget {
   @override
@@ -21,6 +22,7 @@ class _MemberListPageState extends State<MemberListPage> {
   final searchController = TextEditingController();
   String commoditySelectedValue = '';
   double commoditySelectedValuePrice = 0;
+  var logger = Logger(printer: LogFilePrinter());
 
   @override
   void initState() {
@@ -220,7 +222,7 @@ class _MemberListPageState extends State<MemberListPage> {
                                   await dbHelper.getCommodity();
                               _memberConsume(member, commoditys);
                             },
-                            child: Text('消费'),
+                            child: const Text('消费'),
                           ),
                           const SizedBox(width: 10),
                         ],
@@ -524,7 +526,7 @@ class _MemberListPageState extends State<MemberListPage> {
                             _loadMembers();
                             Navigator.of(context).pop(); // 关闭弹出框
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('充值完成')),
+                              const SnackBar(content: Text('充值完成')),
                             );
                           }
                         },
@@ -541,14 +543,14 @@ class _MemberListPageState extends State<MemberListPage> {
 
   // 会员消费弹窗
   void _memberConsume(Member member, List<Commoditys> commoditys) {
-    bool _isButtonEnabled = true;
+    bool isButtonEnabled = true;
     final amountController = TextEditingController(); // 输入金额的控制器
     final passwordContrller = TextEditingController();
 
-    Future<void> _consumptionButton() async {
-      if (!_isButtonEnabled) return; // 防止重复进入
+    Future<void> consumptionButton() async {
+      if (!isButtonEnabled) return; // 防止重复进入
       setState(() {
-        _isButtonEnabled = false; // 点击后禁用
+        isButtonEnabled = false; // 点击后禁用
       });
 
       try {
@@ -591,12 +593,12 @@ class _MemberListPageState extends State<MemberListPage> {
             }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('密码错误')),
+              const SnackBar(content: Text('密码错误')),
             );
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('请输入金额或选择商品')),
+            const SnackBar(content: Text('请输入金额或选择商品')),
           );
         }
 
@@ -607,14 +609,14 @@ class _MemberListPageState extends State<MemberListPage> {
         _loadMembers();
         Navigator.of(context).pop();
       } catch (e) {
-        print('错误: $e'); // 捕获异常，避免崩溃
+        logger.e(e.toString());
       } finally {
         // 延迟0.5秒后恢复按钮
-        await Future.delayed(Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
           // 检查组件是否仍在树中
           setState(() {
-            _isButtonEnabled = true;
+            isButtonEnabled = true;
           });
         }
       }
@@ -657,7 +659,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         '输入金额：',
                         style: TextStyle(fontSize: 15),
                       ),
-                      Container(
+                      SizedBox(
                         width: 130,
                         child: TextField(
                           inputFormatters: [SingleDotInputFormatter()],
@@ -708,7 +710,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         '用户密码：',
                         style: TextStyle(fontSize: 15),
                       ),
-                      Container(
+                      SizedBox(
                         width: 130,
                         child: TextField(
                           inputFormatters: [SingleDotInputFormatter()],
@@ -729,7 +731,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         child: const Text('取消'),
                       ),
                       ElevatedButton(
-                        onPressed: _isButtonEnabled ? _consumptionButton : null,
+                        onPressed: isButtonEnabled ? consumptionButton : null,
                         child: const Text('确定'),
                       )
                     ],

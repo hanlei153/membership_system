@@ -308,7 +308,7 @@ class _ExpansionPanelListCategoryState
                               SnackBar(
                                 content: Text(
                                     '当前 ${commodityCategorys.name} 类目下还有商品未删除，请先删除商品。'),
-                                duration: Duration(seconds: 2),
+                                duration: const Duration(seconds: 2),
                               ),
                             );
                           }

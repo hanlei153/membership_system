@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
                   )),
         );
       } else {
-        logger.d('用户名或密码错误！');
+        logger.e('用户名或密码错误！');
         // 登录失败，显示错误提示
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('用户名或密码错误')),

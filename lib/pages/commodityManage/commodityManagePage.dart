@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../common/sqflite/databaseHelper.dart';
@@ -282,8 +281,6 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
               ),
               DropdownMenu<String>(
                 menuHeight: 200,
-                leadingIcon: Icon(null),
-                trailingIcon: Icon(null),
                 inputDecorationTheme: const InputDecorationTheme(
                   filled: false,
                   iconColor: Colors.transparent,
@@ -321,33 +318,16 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
                   fontSize: 16.0, // 设置字体大小
                 ),
               ),
-              Expanded(
-                child: selectedImageFile != null
-                    ? GestureDetector(
-                        onTap: () {
-                          _selectImageFile();
-                        },
-                        child: Text(
+              ElevatedButton(
+                  onPressed: _selectImageFile,
+                  child: selectedImageFile != null
+                      ? Text(
                           selectedImageFile.toString(),
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 14),
                           maxLines: 1,
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          _selectImageFile();
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(146, 250, 250, 250),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: const Text('选择图片'),
-                        ),
-                      ),
-              ),
+                        )
+                      : const Text('选择图片')),
             ],
           ),
           const SizedBox(
@@ -434,7 +414,7 @@ class _AddCommodityDialogState extends State<_AddCommodityDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$e'),
-          duration: Duration(seconds: 5),
+          duration: const Duration(seconds: 5),
         ),
       );
     }

@@ -3,7 +3,6 @@ import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/rendering.dart';
 import 'package:membership_system/pages/Login.dart';
 
 import 'package:membership_system/pages/commodityManage/commodityManagePage.dart';
@@ -155,7 +154,7 @@ class _MainFramePageState extends State<MainFramePage> {
   // 个人信息介绍
   void _showPersonalInfo() {
     const textStyle = TextStyle(fontSize: 16);
-    Widget _buildRow(String label, String value, TextStyle style) {
+    Widget buildRow(String label, String value, TextStyle style) {
       return Row(
         children: [
           Text(label, style: style.copyWith(fontWeight: FontWeight.bold)),
@@ -183,13 +182,13 @@ class _MainFramePageState extends State<MainFramePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildRow('用户名：', widget.userInfo.username, textStyle),
+                    buildRow('用户名：', widget.userInfo.username, textStyle),
                     const SizedBox(height: 10),
-                    _buildRow('名字：', widget.userInfo.name, textStyle),
+                    buildRow('名字：', widget.userInfo.name, textStyle),
                     const SizedBox(height: 10),
-                    _buildRow('手机号：', widget.userInfo.phone, textStyle),
+                    buildRow('手机号：', widget.userInfo.phone, textStyle),
                     const SizedBox(height: 10),
-                    _buildRow('邮箱：', widget.userInfo.email, textStyle),
+                    buildRow('邮箱：', widget.userInfo.email, textStyle),
                   ],
                 )
               ],
@@ -202,9 +201,9 @@ class _MainFramePageState extends State<MainFramePage> {
 
   // 修改密码
   void _modifyPassword() {
-    final TextEditingController _oldPasswordController = TextEditingController();
-    final TextEditingController _newPasswordController = TextEditingController();
-    final TextEditingController _confirmPasswordController = TextEditingController();
+    final TextEditingController oldPasswordController = TextEditingController();
+    final TextEditingController newPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
     // 弹出对话框，让用户输入旧密码和新密码
     showDialog(
       context: context,
@@ -223,7 +222,7 @@ class _MainFramePageState extends State<MainFramePage> {
               ),
               const SizedBox(height: 30),
               TextField(
-                controller: _oldPasswordController,
+                controller: oldPasswordController,
                 decoration: const InputDecoration(
                   labelText: '旧密码',
                 ),
@@ -231,7 +230,7 @@ class _MainFramePageState extends State<MainFramePage> {
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _newPasswordController,
+                controller: newPasswordController,
                 decoration: const InputDecoration(
                   labelText: '新密码',
                 ),
@@ -239,7 +238,7 @@ class _MainFramePageState extends State<MainFramePage> {
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _confirmPasswordController,
+                controller: confirmPasswordController,
                 decoration: const InputDecoration(
                   labelText: '确认新密码',
                 ),
@@ -260,7 +259,7 @@ class _MainFramePageState extends State<MainFramePage> {
                   ElevatedButton(
                     onPressed: () {
                       // 验证旧密码是否正确
-                      if (_oldPasswordController.text != widget.userInfo.password) {
+                      if (oldPasswordController.text != widget.userInfo.password) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('旧密码错误'),
@@ -269,7 +268,7 @@ class _MainFramePageState extends State<MainFramePage> {
                         );
                       } else {
                         // 验证新密码和确认密码是否一致
-                        if (_newPasswordController.text!= _confirmPasswordController.text) {
+                        if (newPasswordController.text!= confirmPasswordController.text) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('新密码和确认密码不一致'),
@@ -277,7 +276,7 @@ class _MainFramePageState extends State<MainFramePage> {
                             ),
                           );  
                         } else {
-                          if (_newPasswordController.text == widget.userInfo.password) {
+                          if (newPasswordController.text == widget.userInfo.password) {
                             ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('新密码和旧密码相同'),
@@ -286,7 +285,7 @@ class _MainFramePageState extends State<MainFramePage> {
                           );
                           } else {
                            // 修改密码
-                          widget.userInfo.password = _newPasswordController.text;
+                          widget.userInfo.password = newPasswordController.text;
                           dbHelper.modifyUserPassword(widget.userInfo);
                           Navigator.pop(context); 
                           }
@@ -347,7 +346,7 @@ class _MainFramePageState extends State<MainFramePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$e'),
-          duration: Duration(seconds: 5),
+          duration: const Duration(seconds: 5),
         ),
       );
     }
