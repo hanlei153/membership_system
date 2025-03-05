@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          cardTheme: CardTheme(
+          cardTheme: const CardTheme(
             color: Colors.white,
             surfaceTintColor: Colors.transparent, // 禁用材质3的表面色调
             elevation: 4,
