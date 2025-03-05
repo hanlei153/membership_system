@@ -13,7 +13,7 @@ void main() {
   // 检查当前平台是否为桌面平台
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     // 设置窗口大小和位置
-    setWindowFrame(const Rect.fromLTWH(0, 0, 1300, 750));
+    setWindowFrame(const Rect.fromLTWH(300, 300, 1300, 750));
   }
   runApp(MyApp());
 }
@@ -24,18 +24,22 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '会员系统',
       theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(179, 58, 199, 255),
-          brightness: Brightness.light,
-        ),
-        textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 72,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-      ),
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(179, 58, 199, 255),
+            brightness: Brightness.light,
+          ),
+          textTheme: const TextTheme(
+            displayLarge: TextStyle(
+              fontSize: 72,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          cardTheme: CardTheme(
+            color: Colors.white,
+            surfaceTintColor: Colors.transparent, // 禁用材质3的表面色调
+            elevation: 4,
+          )),
       home: const LoginPage(),
     );
   }

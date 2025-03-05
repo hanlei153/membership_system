@@ -128,6 +128,16 @@ class DatabaseHelper {
         : (result[0]['total'] as double).toInt();
   }
 
+  Future<List<Map<String, dynamic>>> searchSales(
+      int startDate, int endDate) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT timestamp, amount FROM Transactions WHERE timestamp BETWEEN? AND? AND type =? AND isRefund =?',
+      [startDate, endDate, '消费', 0],
+    );
+    return result;
+  }
+
   // 用户表
   Future<void> addUser(User user) async {
     final db = await database;

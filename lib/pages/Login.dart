@@ -17,10 +17,16 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController =
       TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
-      TextEditingController(text: '');
+      TextEditingController(text: '123456');
   var logger = Logger(printer: LogFilePrinter(),level: Level.verbose,);
 
   final dbHelper = DatabaseHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _login();
+  }
 
   void _login() async {
     logger.i('调用登陆按钮！');
