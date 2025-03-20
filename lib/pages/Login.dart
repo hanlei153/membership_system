@@ -18,7 +18,12 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
       TextEditingController(text: '');
-  var logger = Logger(printer: LogFilePrinter(),level: Level.verbose,);
+  var logger = Logger(
+    printer: LogFilePrinter(),
+    level: Level.verbose,
+  );
+
+  bool isLongPress = false;
 
   final dbHelper = DatabaseHelper();
 
@@ -63,17 +68,31 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: GestureDetector(
-          onLongPress: () async {
-            // 重置密码
-            await dbHelper.resetPassword();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('管理员密码已重置为123456')),
-            );
-          },
-          child: const Text('  '),
+          title: Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const Text('鲸储会员系统'),
+            GestureDetector(
+              onLongPressMoveUpdate: (details) async {
+                if (!isLongPress) {
+                  isLongPress = true;
+                  // 重置密码
+                  await dbHelper.resetPassword();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('管理员密码已重置为123456')),
+                  );
+                }
+              },
+              onLongPressEnd: (details) async {
+                isLongPress = false;
+              },
+              child: const Text('  '),
+            ),
+          ],
         ),
-      ),
+      )),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
