@@ -35,10 +35,12 @@ jobs:
         run: flutter build macos
 
       - name: Create DMG
-        run: create-dmg \
-            --volname "membership_system" \
-            "build/macos/Build/Products/Release/membership_system.app" \
-            "membership_system.dmg"
+        run: pwd \
+             ls -l \
+             create-dmg \
+                 --volname "membership_system" \
+                 "$(pwd)/membership_system.dmg" \
+                 "$(pwd)/build/macos/Build/Products/Release/membership_system.app"
 
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
