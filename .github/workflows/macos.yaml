@@ -34,16 +34,11 @@ jobs:
       - name: Build macOS App
         run: flutter build macos
 
-      - name: Check create-dmg version
-        run: create-dmg --help  # 确保 create-dmg 正常安装
-
       - name: Create DMG
-        run: |
-          mkdir -p dist
-          create-dmg \
+        run: create-dmg \
             --volname "membership_system" \
             "build/macos/Build/Products/Release/membership_system.app" \
-            "dist/membership_system.dmg"
+            "membership_system.dmg"
 
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
