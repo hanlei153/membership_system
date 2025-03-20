@@ -42,7 +42,8 @@ jobs:
           mkdir -p dist
           create-dmg \
             --volname "membership_system" \
-            "build/macos/Build/Products/Release/membership_system.app" dist/
+            "build/macos/Build/Products/Release/membership_system.app" \
+            "dist/membership_system.dmg"
 
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
