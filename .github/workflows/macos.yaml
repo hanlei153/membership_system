@@ -35,9 +35,7 @@ jobs:
         run: flutter build macos
 
       - name: Create DMG
-        run: pwd \
-             ls -l \
-             create-dmg \
+        run: create-dmg \
                  --volname "membership_system" \
                  "$(pwd)/membership_system.dmg" \
                  "$(pwd)/build/macos/Build/Products/Release/membership_system.app"
