@@ -1,0 +1,38 @@
+name: Build macOS DMG
+
+on:
+  push:
+    branches:
+      - main  # 你可以改成自己的分支
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          brew install create-dmg
+
+      - name: Build macOS App (Flutter)
+        run: |
+          flutter config --enable-macos-desktop
+          flutter pub get
+          flutter build macos
+
+      - name: Create DMG
+        run: |
+          mkdir -p dist
+          create-dmg \
+            --overwrite \
+            --dmg-title="membership_system" \
+            "build/macos/Build/Products/Release/membership_system.app" dist/
+
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: myapp-dmg
+          path: dist/*.dmg
