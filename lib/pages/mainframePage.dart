@@ -13,7 +13,6 @@ import 'package:membership_system/common/model/user.dart';
 import 'package:membership_system/common/sqflite/databaseHelper.dart';
 import '../common/fuctions/LogFilePrinter.dart';
 
-
 class MainFramePage extends StatefulWidget {
   const MainFramePage({super.key, required this.title, required this.userInfo});
 
@@ -86,14 +85,13 @@ class _MainFramePageState extends State<MainFramePage> {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('修改密码'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 处理密码修改逻辑
-                    _modifyPassword();
-                  }
-                ),
+                    leading: const Icon(Icons.settings),
+                    title: const Text('修改密码'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      // 处理密码修改逻辑
+                      _modifyPassword();
+                    }),
                 ListTile(
                     leading: const Icon(Icons.exit_to_app),
                     title: const Text('退出'),
@@ -159,10 +157,16 @@ class _MainFramePageState extends State<MainFramePage> {
         children: [
           Text(label, style: style.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(width: 10),
-          Expanded(child: Text(value, style: style,overflow: TextOverflow.ellipsis,)),
+          Expanded(
+              child: Text(
+            value,
+            style: style,
+            overflow: TextOverflow.ellipsis,
+          )),
         ],
       );
     }
+
     showDialog(
       context: context,
       builder: (context) {
@@ -203,105 +207,105 @@ class _MainFramePageState extends State<MainFramePage> {
   void _modifyPassword() {
     final TextEditingController oldPasswordController = TextEditingController();
     final TextEditingController newPasswordController = TextEditingController();
-    final TextEditingController confirmPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController =
+        TextEditingController();
     // 弹出对话框，让用户输入旧密码和新密码
     showDialog(
-      context: context,
-      builder: (context) {
-       return Dialog(
-        child: Container(
-          padding: const EdgeInsets.all(20.0),
-          height: 400,
-          width: 500,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                '修改密码',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 30),
-              TextField(
-                controller: oldPasswordController,
-                decoration: const InputDecoration(
-                  labelText: '旧密码',
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: newPasswordController,
-                decoration: const InputDecoration(
-                  labelText: '新密码',
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: confirmPasswordController,
-                decoration: const InputDecoration(
-                  labelText: '确认新密码',
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // 处理取消按钮点击事件
-                      Navigator.pop(context);
-                    },
-                    child: const Text('取消'),
-                  ),  
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      // 验证旧密码是否正确
-                      if (oldPasswordController.text != widget.userInfo.password) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('旧密码错误'),
-                            duration: Duration(seconds: 2),
+        context: context,
+        builder: (context) {
+          return Dialog(
+              child: Container(
+                  padding: const EdgeInsets.all(20.0),
+                  height: 400,
+                  width: 500,
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    const Text(
+                      '修改密码',
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 30),
+                    TextField(
+                      controller: oldPasswordController,
+                      decoration: const InputDecoration(
+                        labelText: '旧密码',
+                      ),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: newPasswordController,
+                      decoration: const InputDecoration(
+                        labelText: '新密码',
+                      ),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: confirmPasswordController,
+                      decoration: const InputDecoration(
+                        labelText: '确认新密码',
+                      ),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 30),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // 处理取消按钮点击事件
+                              Navigator.pop(context);
+                            },
+                            child: const Text('取消'),
                           ),
-                        );
-                      } else {
-                        // 验证新密码和确认密码是否一致
-                        if (newPasswordController.text!= confirmPasswordController.text) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('新密码和确认密码不一致'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );  
-                        } else {
-                          if (newPasswordController.text == widget.userInfo.password) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('新密码和旧密码相同'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                          } else {
-                           // 修改密码
-                          widget.userInfo.password = newPasswordController.text;
-                          dbHelper.modifyUserPassword(widget.userInfo);
-                          Navigator.pop(context); 
-                          }
-                        }
-                      }
-                    },
-                    child: const Text('确定'),
-                  ),
-                ]  
-              )
-            ] 
-          ) 
-        )
-       ); 
-      }  
-    );
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: () {
+                              // 验证旧密码是否正确
+                              if (oldPasswordController.text !=
+                                  widget.userInfo.password) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('旧密码错误'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              } else {
+                                // 验证新密码和确认密码是否一致
+                                if (newPasswordController.text !=
+                                    confirmPasswordController.text) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('新密码和确认密码不一致'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                } else {
+                                  if (newPasswordController.text ==
+                                      widget.userInfo.password) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('新密码和旧密码相同'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  } else {
+                                    // 修改密码
+                                    widget.userInfo.password =
+                                        newPasswordController.text;
+                                    dbHelper
+                                        .modifyUserPassword(widget.userInfo);
+                                    Navigator.pop(context);
+                                  }
+                                }
+                              }
+                            },
+                            child: const Text('确定'),
+                          ),
+                        ])
+                  ])));
+        });
   }
 
   // 修改头像

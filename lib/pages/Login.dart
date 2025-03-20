@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController =
       TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
-      TextEditingController(text: '123456');
+      TextEditingController(text: '');
   var logger = Logger(printer: LogFilePrinter(),level: Level.verbose,);
 
   final dbHelper = DatabaseHelper();
@@ -25,7 +25,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _login();
   }
 
   void _login() async {
@@ -64,7 +63,16 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('登录'),
+        title: GestureDetector(
+          onLongPress: () async {
+            // 重置密码
+            await dbHelper.resetPassword();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('管理员密码已重置为123456')),
+            );
+          },
+          child: const Text('  '),
+        ),
       ),
       body: Center(
         child: Padding(

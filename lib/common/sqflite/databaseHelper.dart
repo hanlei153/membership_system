@@ -109,6 +109,13 @@ class DatabaseHelper {
     );
   }
 
+  // 重置密码
+  Future<void> resetPassword() async {
+    final db = await database;
+    await db.update('User', {'password': '123456'},
+        where: 'username =?', whereArgs: ['admin']);
+  }
+
   // 首页数据展示查询
   Future<int> searchAddMember(int startDate, int endDate) async {
     final db = await database;

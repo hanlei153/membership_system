@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           ),
           cardTheme: const CardTheme(
             color: Colors.white,
-            surfaceTintColor: Colors.transparent, // 禁用材质3的表面色调
+            surfaceTintColor: Colors.transparent,
             elevation: 4,
           )),
       home: const LoginPage(),
