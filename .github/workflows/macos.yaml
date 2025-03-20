@@ -3,7 +3,7 @@ name: Build macOS DMG
 on:
   push:
     branches:
-      - main  # 你可以改成自己的分支
+      - main
 
 jobs:
   build-macos:
@@ -16,29 +16,36 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.27.1
+          flutter-version: 3.27.1  # 替换为你的 Flutter 版本
           cache: true
 
       - name: Install Dependencies
         run: |
-          brew install create-dmg
+          brew install create-dmg || brew reinstall create-dmg
 
-      - name: Build macOS App (Flutter)
+      - name: Enable macOS Support
         run: |
           flutter config --enable-macos-desktop
-          flutter pub get
-          flutter build macos
+          flutter doctor
+
+      - name: Get Flutter Packages
+        run: flutter pub get
+
+      - name: Build macOS App
+        run: flutter build macos
+
+      - name: Check create-dmg version
+        run: create-dmg --help  # 确保 create-dmg 正常安装
 
       - name: Create DMG
         run: |
           mkdir -p dist
           create-dmg \
-            --overwrite \
             --dmg-title="membership_system" \
             "build/macos/Build/Products/Release/membership_system.app" dist/
 
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: myapp-dmg
+          name: membership_system-dmg
           path: dist/*.dmg
