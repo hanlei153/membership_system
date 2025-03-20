@@ -6,8 +6,10 @@ import 'pages/Login.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   // 确保 Flutter 绑定初始化，以便访问窗口相关功能
   WidgetsFlutterBinding.ensureInitialized();
   // 检查当前平台是否为桌面平台
