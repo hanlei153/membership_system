@@ -44,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: membership_system-dmg
-          path: dist/*.dmg
+          path: membership_system.dmg
